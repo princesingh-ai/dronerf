@@ -151,15 +151,3 @@ The training pipeline is verified by checking
 * Successful gradient computation.
 * Successful optimizer update.
 * Stable loss values.
-
----
-
-Future Work
------------
-
-* Learning rate scheduling.
-* Early stopping.
-* Mixed precision training.
-* Gradient clipping.
-* Automatic logging.
-* Distributed training.

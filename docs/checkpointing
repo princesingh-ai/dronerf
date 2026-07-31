@@ -129,14 +129,3 @@ The checkpoint implementation is verified by checking
 * Successful checkpoint loading.
 * Correct epoch restoration.
 * Correct loss restoration.
-
----
-
-Future Work
------------
-
-* Save only the best validation model.
-* Periodically save checkpoints every N epochs.
-* Store training and validation accuracy.
-* Save learning rate scheduler state.
-* Support automatic checkpoint resumption.

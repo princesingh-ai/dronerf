@@ -189,29 +189,3 @@ Validation includes
 * Output remains complex.
 * Output is two-dimensional.
 * Windows are generated for every dataset.
-
-Future Work
------------
-
-Future experiments will compare multiple configurations.
-
-Window Sizes
-
-* 2048
-* 4096
-* 8192
-
-Stride Values
-
-* 4096 (0% overlap)
-* 2048 (50% overlap)
-* 1024 (75% overlap)
-
-Performance will be evaluated using
-
-* Accuracy
-* Precision
-* Recall
-* F1 Score
-* Training Time
-* Inference Time
