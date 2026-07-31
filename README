@@ -208,23 +208,27 @@ Prerequisites
 ~~~~~~~~~~~~~
 
 * Python 3.10 or higher
-* `uv` or `pip` package manager
+* `uv` package manager
+
+To install `uv` on macOS via Homebrew:
+
+    brew install uv
 
 Installation
 ~~~~~~~~~~~~
 
-Clone the repository and install required dependencies:
+Clone the repository and sync dependencies using `uv`:
 
     git clone https://github.com/princesingh-ai/dronerf.git
     cd dronerf
-    pip install -e .
+    uv sync
 
 Executing Unit Tests
 ~~~~~~~~~~~~~~~~~~~~
 
-Run the complete test suite using `pytest`:
+Run the complete test suite using `uv`:
 
-    pytest -v
+    uv run pytest -v
 
 Processing Raw Data and Training
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -233,11 +237,11 @@ Processing Raw Data and Training
 2. Place raw binary non-drone recordings (`.data`) into `random_rf/`.
 3. Generate preprocessed windowed datasets:
 
-    python -c "from data_processing.save import create_dataset; create_dataset('drone_rf', 'random_rf', 'processed')"
+    uv run python -c "from data_processing.save import create_dataset; create_dataset('drone_rf', 'random_rf', 'processed')"
 
 4. Execute model training:
 
-    python main.py
+    uv run python main.py
 
 
 Project Workflow
