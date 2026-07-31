@@ -1,3 +1,7 @@
 drone_rf/
 random_rf/
 .venv/
+__pycache__
+__init__/
+checkpoints
+processed/
