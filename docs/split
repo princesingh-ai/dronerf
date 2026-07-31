@@ -108,3 +108,14 @@ The tests ensure that:
 - The total number of recordings is preserved.
 - Drone and non-drone recordings are split independently.
 - Invalid split ratios raise a ValueError.
+
+---
+
+Future Work
+-----------
+
+- Implement stratified dataset splitting.
+- Group recordings from the same physical drone into the same dataset.
+- Support k-fold cross-validation.
+- Generate dataset statistics after splitting.
+- Export split information as JSON for experiment tracking.

@@ -248,3 +248,15 @@ The implementation is verified by checking
 * Output tensor data type.
 * Numerical stability.
 * Compatibility with the RF dataset and DataLoader.
+
+---
+
+Future Work
+-----------
+
+* Residual convolution blocks.
+* Dilated convolutions.
+* Attention mechanisms.
+* Depthwise separable convolutions.
+* Multi-scale convolution kernels.
+* Hybrid CNN-Transformer architectures.
