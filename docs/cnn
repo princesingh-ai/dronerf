@@ -1,0 +1,262 @@
+1D Convolutional Neural Network
+===============================
+
+Purpose
+-------
+
+Classify an RF IQ window as either a drone or a non-drone signal.
+
+The model receives one IQ window at a time and learns hierarchical temporal
+features using one-dimensional convolutional layers.
+
+---
+
+Input
+-----
+
+Each sample consists of one normalized IQ window.
+
+Input Shape
+
+    (2, 4096)
+
+Channel 0
+
+    In-phase (I)
+
+Channel 1
+
+    Quadrature (Q)
+
+---
+
+Architecture
+------------
+
+Input
+
+↓
+
+Convolution Block 1
+
+↓
+
+Convolution Block 2
+
+↓
+
+Convolution Block 3
+
+↓
+
+Adaptive Average Pooling
+
+↓
+
+Fully Connected Layer
+
+↓
+
+Output
+
+---
+
+Implementation
+--------------
+
+Convolution Block 1
+
+* Conv1D (2 → 32)
+* Kernel Size = 7
+* Batch Normalization
+* ReLU
+* Max Pooling
+
+Convolution Block 2
+
+* Conv1D (32 → 64)
+* Kernel Size = 5
+* Batch Normalization
+* ReLU
+* Max Pooling
+
+Convolution Block 3
+
+* Conv1D (64 → 128)
+* Kernel Size = 3
+* Batch Normalization
+* ReLU
+* Max Pooling
+
+Classifier
+
+* Adaptive Average Pooling
+* Flatten
+* Fully Connected Layer (128 → 1)
+
+---
+
+Output
+------
+
+Output Shape
+
+    (Batch Size, 1)
+
+The network returns a single logit for binary classification.
+
+Positive values indicate drone-like RF patterns, while negative values indicate
+non-drone RF patterns.
+
+A sigmoid activation is intentionally omitted because the loss function
+(BCEWithLogitsLoss) applies it internally.
+
+---
+
+Why Use 1D Convolution?
+-----------------------
+
+IQ samples are sequential time-series data.
+
+One-dimensional convolution learns temporal relationships directly from the
+signal without requiring conversion into spectrograms or images.
+
+This preserves the original RF information while reducing preprocessing.
+
+---
+
+Why Three Convolution Blocks?
+-----------------------------
+
+The first layer learns simple RF characteristics.
+
+The second layer combines lower-level features into more informative temporal
+patterns.
+
+The third layer learns higher-level representations useful for distinguishing
+drone and non-drone transmissions.
+
+Increasing the number of feature channels allows the network to learn more
+complex signal characteristics.
+
+---
+
+Why Kernel Sizes 7, 5 and 3?
+----------------------------
+
+The first convolution uses a larger receptive field to capture broader temporal
+patterns.
+
+Subsequent layers use smaller kernels to refine increasingly localized and
+abstract features.
+
+This progressively reduces the receptive field while increasing feature
+complexity.
+
+---
+
+Why Batch Normalization?
+------------------------
+
+Batch normalization is applied after every convolution layer.
+
+Benefits include
+
+* Faster convergence.
+* Improved training stability.
+* Reduced internal covariate shift.
+* Support for higher learning rates.
+
+---
+
+Why ReLU?
+---------
+
+ReLU introduces non-linearity while remaining computationally efficient.
+
+Benefits include
+
+* Fast computation.
+* Sparse activations.
+* Reduced vanishing gradient problems.
+
+---
+
+Why Max Pooling?
+----------------
+
+Max pooling reduces the temporal dimension after each convolution block.
+
+Benefits include
+
+* Lower computational cost.
+* Reduced memory usage.
+* Larger effective receptive field.
+* Increased robustness to small temporal shifts.
+
+---
+
+Why Adaptive Average Pooling?
+-----------------------------
+
+Adaptive Average Pooling converts the final feature map into a fixed-size
+representation.
+
+Benefits include
+
+* Removes the need to manually calculate flattened dimensions.
+* Simplifies architecture modifications.
+* Produces a consistent feature vector for the classifier.
+
+---
+
+Why One Output Neuron?
+----------------------
+
+The task is binary classification.
+
+Class Labels
+
+* Drone = 1
+* Non-Drone = 0
+
+A single output neuron predicts the probability of the input belonging to the
+drone class.
+
+---
+
+Why No Sigmoid Layer?
+---------------------
+
+The final layer produces raw logits.
+
+The sigmoid activation is handled internally by BCEWithLogitsLoss during
+training.
+
+This approach provides improved numerical stability compared to applying a
+separate sigmoid layer.
+
+---
+
+Testing
+-------
+
+The implementation is verified by checking
+
+* Forward pass execution.
+* Output tensor shape.
+* Output tensor data type.
+* Numerical stability.
+* Compatibility with the RF dataset and DataLoader.
+
+---
+
+Future Work
+-----------
+
+* Residual convolution blocks.
+* Dilated convolutions.
+* Attention mechanisms.
+* Depthwise separable convolutions.
+* Multi-scale convolution kernels.
+* Hybrid CNN-Transformer architectures.
