@@ -406,3 +406,20 @@ The dataset pipeline is verified using automated `pytest` suites:
 * `tests/test_rf_dataset.py`: Verifies `RFDataset` length calculations and validates
   tensor output shape `(2, 4096)` and data type (`torch.float32`).
 
+
+Future Dataset Improvements
+---------------------------
+
+1. Real-Time Data Augmentation: Incorporate on-the-fly domain augmentation inside
+   `RFDataset.__getitem__()`:
+   - Additive White Gaussian Noise (AWGN) injection to simulate low SNR environments.
+   - Random Carrier Frequency Offset (CFO) to simulate receiver oscillator drift.
+   - Phase Noise and Rayleigh Fading channel simulation.
+
+2. Fine-Grained Multi-Class Datasets: Expand drone labels from binary classification
+   (Drone vs. Non-Drone) to specific drone models (e.g., DJI Mavic, Phantom 4, Matrice 600,
+   Parrot Disco) and operational transmission states (Hovering, Video Streaming, Return-to-Home).
+
+3. HDF5 / Zarr Container Migration: Transition dataset storage from thousands of individual
+   `.npy` files to structured HDF5 or Zarr binary containers to optimize file system inode
+   usage on HPC clusters.

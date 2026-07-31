@@ -394,3 +394,15 @@ Training stability is tested using `pytest`:
 * `tests/test_checkpoints.py`: Saves model weights to a temporary file, mutates model
   weights, loads the checkpoint, and asserts exact numerical state restoration.
 
+
+Future Improvements
+-------------------
+
+1. Learning Rate Schedulers: Implement `CosineAnnealingLR` or `ReduceLROnPlateau` to
+   dynamically decay learning rates as validation loss plateaus.
+
+2. Automatic Mixed Precision (AMP): Integrate `torch.cuda.amp.autocast()` to accelerate
+   training speeds by 2x on Tensor Core GPUs using FP16 / BF16 mixed precision.
+
+3. Early Stopping Callbacks: Halt training automatically if validation loss fails to improve
+   for $N$ consecutive epochs.

@@ -422,9 +422,9 @@ Documentation Links
 
 For detailed technical specifications, refer to the individual project manuals:
 
-* [ARCHITECTURE.md](ARCHITECTURE.md): Complete system module architecture, tensor shape tracking, control flows, and memory mapping.
-* [DATASET.md](DATASET.md): RF signal physics, dataset acquisition, file format specifications, and splitting logic.
-* [TRAINING.md](TRAINING.md): Loss formulations, optimization dynamics, metric implementations, and checkpoint management.
+* [ARCHITECTURE](ARCHITECTURE): Complete system module architecture, tensor shape tracking, control flows, and memory mapping.
+* [DATASET](DATASET): RF signal physics, dataset acquisition, file format specifications, and splitting logic.
+* [TRAINING_MANUAL](TRAINING_MANUAL): Loss formulations, optimization dynamics, metric implementations, and checkpoint management.
 
 
 References
