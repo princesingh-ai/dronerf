@@ -1,0 +1,121 @@
+Dataset Splitting
+=================
+
+Purpose
+-------
+
+Split drone and non-drone recordings into training, validation, and testing
+datasets before window generation.
+
+Splitting is performed at the recording level to prevent data leakage caused by
+overlapping windows.
+
+---
+
+Implementation
+--------------
+
+The dataset is divided into three subsets:
+
+- Training Set
+- Validation Set
+- Test Set
+
+The default split ratios are:
+
+```text
+Train      : 80%
+Validation : 10%
+Test       : 10%
+```
+
+Drone recordings and non-drone recordings are shuffled independently and split
+using the same ratios to maintain a balanced dataset.
+
+A fixed random seed is used so that every execution produces the same dataset
+split.
+
+---
+
+Why Split Before Window Generation?
+-----------------------------------
+
+Window generation creates overlapping samples from a recording.
+
+If the recordings are first converted into windows and then randomly split,
+neighbouring windows may appear in different datasets while sharing many of the
+same IQ samples.
+
+This causes data leakage because the model is evaluated on data that is highly
+similar to the data it was trained on.
+
+To avoid this problem, recordings are first assigned to either the training,
+validation, or testing dataset. Window generation is then performed separately
+for each dataset.
+
+---
+
+Why Shuffle the Recordings?
+---------------------------
+
+Recordings are shuffled before splitting to eliminate ordering bias.
+
+Without shuffling, recordings stored in a particular order could result in an
+unbalanced dataset.
+
+Shuffling ensures that each dataset contains a representative mixture of
+recordings.
+
+A fixed random seed guarantees that the same recordings are assigned to the
+same dataset across multiple executions, making experiments reproducible.
+
+---
+
+Why 80 / 10 / 10?
+-----------------
+
+The current dataset contains a limited number of recordings.
+
+Using an 80 / 10 / 10 split maximizes the amount of training data while still
+providing separate validation and testing datasets.
+
+The split ratios can be adjusted as additional recordings become available.
+
+---
+
+Why Use ValueError Instead of assert?
+-------------------------------------
+
+Function arguments are validated using exceptions rather than assertions.
+
+Assertions are intended for debugging and internal consistency checks and may
+be disabled when Python is executed with optimization.
+
+Raising a ValueError ensures invalid input is always detected regardless of the
+execution environment.
+
+---
+
+Testing
+-------
+
+The dataset splitting implementation is verified using unit tests.
+
+The tests ensure that:
+
+- Every recording appears exactly once.
+- No recording exists in multiple datasets.
+- The total number of recordings is preserved.
+- Drone and non-drone recordings are split independently.
+- Invalid split ratios raise a ValueError.
+
+---
+
+Future Work
+-----------
+
+- Implement stratified dataset splitting.
+- Group recordings from the same physical drone into the same dataset.
+- Support k-fold cross-validation.
+- Generate dataset statistics after splitting.
+- Export split information as JSON for experiment tracking.
