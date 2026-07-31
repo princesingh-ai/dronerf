@@ -3,7 +3,7 @@ import torch
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-3
 EPOCHS = 5
-NUM_WORKERS = 4
+NUM_WORKERS = 0
 
 DEVICE = (
     "cuda"
