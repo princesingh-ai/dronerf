@@ -14,20 +14,17 @@ class RFDataset(Dataset):
 
     def __init__(self, dataset_path: str):
         self.samples = []
-        self.cache = {}
         dataset_path = Path(dataset_path)
 
         # Drone samples
         for file in (dataset_path / "drone").glob("*.npy"):
             windows = np.load(file, mmap_mode="r")
-            self.cache[file] = windows
             for index in range(len(windows)):
                 self.samples.append((file, index, DRONE_LABEL))
 
         # Non-drone samples
         for file in (dataset_path / "non_drone").glob("*.npy"):
             windows = np.load(file, mmap_mode="r")
-            self.cache[file] = windows
             for index in range(len(windows)):
                 self.samples.append((file, index, NON_DRONE_LABEL))
 
@@ -39,7 +36,8 @@ class RFDataset(Dataset):
         """Return one IQ window and its label."""
 
         file, window_index, label = self.samples[index]
-        window = self.cache[file][window_index]
+        windows = np.load(file, mmap_mode="r")
+        window = windows[window_index]
         window = normalize(window)
         window = np.stack(
             (
