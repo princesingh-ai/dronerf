@@ -1,0 +1,165 @@
+Training
+========
+
+Purpose
+-------
+
+Train the 1D Convolutional Neural Network to distinguish drone RF signals from
+non-drone RF signals.
+
+The training loop repeatedly updates the model parameters by minimizing the
+binary classification loss over the training dataset.
+
+---
+
+Pipeline
+--------
+
+Load Data
+
+↓
+
+Forward Pass
+
+↓
+
+Compute Loss
+
+↓
+
+Backpropagation
+
+↓
+
+Update Parameters
+
+↓
+
+Repeat
+
+---
+
+Implementation
+--------------
+
+The training procedure performs the following steps.
+
+1. Load the training and validation datasets.
+2. Initialize the CNN model.
+3. Initialize the loss function.
+4. Initialize the optimizer.
+5. Perform a forward pass.
+6. Compute the training loss.
+7. Compute gradients using backpropagation.
+8. Update model parameters.
+9. Repeat for every epoch.
+
+---
+
+Why Use BCEWithLogitsLoss?
+--------------------------
+
+The problem is binary classification.
+
+Class Labels
+
+* Drone = 1
+* Non-Drone = 0
+
+BCEWithLogitsLoss combines the sigmoid activation and binary cross entropy into
+a single numerically stable operation.
+
+---
+
+Why Use Adam?
+-------------
+
+Adam is an adaptive optimization algorithm that automatically adjusts learning
+rates for individual model parameters.
+
+Benefits include
+
+* Fast convergence.
+* Stable optimization.
+* Minimal hyperparameter tuning.
+
+---
+
+Why Convert Labels to Float?
+----------------------------
+
+The model produces floating-point logits.
+
+Labels are therefore converted to floating-point tensors before computing the
+loss.
+
+The labels are reshaped from
+
+    (Batch Size)
+
+to
+
+    (Batch Size, 1)
+
+to match the model output.
+
+---
+
+Why Call model.train()?
+-----------------------
+
+model.train() enables training mode.
+
+Layers such as Batch Normalization and Dropout behave differently during
+training and evaluation.
+
+Calling model.train() ensures these layers operate correctly while updating the
+network parameters.
+
+---
+
+Backpropagation
+---------------
+
+For every batch
+
+Forward Pass
+
+↓
+
+Loss Computation
+
+↓
+
+Gradient Computation
+
+↓
+
+Parameter Update
+
+The optimizer updates the network weights using the computed gradients.
+
+---
+
+Testing
+-------
+
+The training pipeline is verified by checking
+
+* Successful forward pass.
+* Successful loss computation.
+* Successful gradient computation.
+* Successful optimizer update.
+* Stable loss values.
+
+---
+
+Future Work
+-----------
+
+* Learning rate scheduling.
+* Early stopping.
+* Mixed precision training.
+* Gradient clipping.
+* Automatic logging.
+* Distributed training.
