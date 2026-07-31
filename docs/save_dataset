@@ -1,0 +1,141 @@
+Dataset Creation
+=========================
+
+Purpose
+-------
+
+Generate the final train, validation, and test datasets by converting raw RF
+recordings into overlapping IQ windows.
+
+The resulting datasets are stored as NumPy arrays for efficient loading during
+model training.
+
+---
+
+Pipeline
+--------
+
+Raw RF Recordings
+↓
+Dataset Split
+↓
+Load Recording
+↓
+Window Generation
+↓
+Save Dataset (.npy)
+
+---
+
+Implementation
+--------------
+
+The dataset creation pipeline performs the following steps.
+
+1. Discover all drone recordings (*.bin).
+2. Discover all non-drone recordings (*.data).
+3. Split the recordings into training, validation, and testing datasets.
+4. Load each recording.
+5. Generate overlapping IQ windows.
+6. Save the generated windows as NumPy files.
+
+Each recording produces one output file.
+
+Example
+
+DJI_mavic_pro_2G.bin
+
+↓
+
+DJI_mavic_pro_2G.npy
+
+---
+
+Dataset Structure
+-----------------
+
+processed/
+
+├── train/
+│   ├── drone/
+│   └── non_drone/
+│
+├── validation/
+│   ├── drone/
+│   └── non_drone/
+│
+└── test/
+    ├── drone/
+    └── non_drone/
+
+Each NumPy file contains every overlapping window extracted from one RF
+recording.
+
+---
+
+Why Split Before Window Generation?
+-----------------------------------
+
+Dataset splitting is performed before window generation.
+
+Generating windows before splitting could place overlapping windows from the
+same recording into different datasets.
+
+This causes data leakage because the model would observe nearly identical IQ
+samples during both training and evaluation.
+
+Splitting first guarantees complete separation between the training,
+validation, and testing datasets.
+
+---
+
+Why Save Windowed Data?
+-----------------------
+
+Window generation is computationally more expensive than loading an existing
+NumPy file.
+
+Generating windows once during preprocessing avoids repeating the same work
+during every training epoch.
+
+This significantly reduces preprocessing overhead while training.
+
+---
+
+Why Use NumPy Files?
+--------------------
+
+NumPy files were selected because they
+
+* preserve complex IQ samples,
+* load quickly,
+* require no parsing,
+* integrate directly with NumPy and PyTorch,
+* reduce preprocessing time during training.
+
+---
+
+Why Is Normalization Not Applied Here?
+--------------------------------------
+
+Peak normalization is intentionally excluded from dataset creation.
+
+Normalization is a lightweight O(n) operation and will instead be applied when
+loading data for training.
+
+Keeping normalization separate allows different normalization strategies to be
+evaluated without regenerating the saved datasets.
+
+---
+
+Testing
+-------
+
+The generated datasets are validated by checking
+
+* directory structure,
+* file generation,
+* window dimensions,
+* complex IQ representation,
+* total window count,
+* train, validation, and test separation.
