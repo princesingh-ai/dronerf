@@ -230,8 +230,8 @@ Run the complete test suite using `uv`:
 
     uv run pytest -v
 
-Processing Raw Data and Training
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Processing Raw Data, Training, and Evaluation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Place raw binary drone recordings (`.bin`) into `drone_rf/`.
 2. Place raw binary non-drone recordings (`.data`) into `random_rf/`.
@@ -242,6 +242,64 @@ Processing Raw Data and Training
 4. Execute model training:
 
     uv run python main.py
+
+5. Evaluate trained checkpoint on test dataset:
+
+    uv run python evaluate.py
+
+6. Perform inference prediction on a raw RF recording:
+
+    uv run python predict.py drone_rf/DJI_mavic_pro_2G.bin
+
+
+Evaluation Results
+------------------
+
+Model Evaluation Metrics
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Performance metrics evaluated on the test set for Epoch 3 checkpoint:
+
+* Checkpoint Epoch : 3
+* Validation Loss  : 0.0158
+* Accuracy         : 0.9956 (99.56%)
+* Precision        : 0.9970 (99.70%)
+* Recall           : 0.9978 (99.78%)
+* F1 Score         : 0.9974 (99.74%)
+
+Confusion Matrix
+~~~~~~~~~~~~~~~~
+
+```
+               Predicted
+               Drone   Non-Drone
+Drone          97438   216
+Non-Drone      296     19232
+```
+
+Sample Inference Predictions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. DJI Mavic Pro 2.4 GHz RF Recording (`drone_rf/DJI_mavic_pro_2G.bin`):
+
+    $ uv run python predict.py drone_rf/DJI_mavic_pro_2G.bin
+    Windows              : 58592
+    Average Probability  : 0.9930
+    Prediction           : Drone
+
+2. Yuneec Typhoon H 5.8 GHz RF Recording (`Yuneec_typhoon_h_5G.bin`):
+
+    $ uv run python predict.py Yuneec_typhoon_h_5G.bin
+    Windows              : 48827
+    Average Probability  : 0.9894
+    Prediction           : Drone
+
+3. Non-Drone Wi-Fi 802.11ax RF Recording (`random_rf/Wi-Fi/802_11ax_mcs7_50mbps/32274CA-015-D20211123T131300M012278.data`):
+
+    $ uv run python predict.py random_rf/Wi-Fi/802_11ax_mcs7_50mbps/32274CA-015-D20211123T131300M012278.data
+    Windows              : 9764
+    Average Probability  : 0.1327
+    Prediction           : Non-Drone
 
 
 Project Workflow
