@@ -1,0 +1,217 @@
+Window Generation
+=================
+
+Purpose
+-------
+
+Raw RF recordings contain millions of IQ samples, while the neural network
+expects fixed-size inputs.
+
+Window generation divides a long recording into smaller fixed-length segments.
+Each segment becomes one independent training sample.
+
+Pipeline
+--------
+
+Raw IQ Recording
+
+↓
+
+Window Generation
+
+↓
+
+Fixed-Size IQ Windows
+
+↓
+
+Neural Network
+
+Terminology
+-----------
+
+Window Size
+~~~~~~~~~~~
+
+Window size is the number of consecutive IQ samples contained in a single
+training example.
+
+Current Value
+
+    Window Size = 4096 IQ Samples
+
+Example
+
+Recording
+
+[--------------------------------------------------------------]
+
+↓
+
+[====4096====][====4096====][====4096====]
+
+Every generated window contains exactly 4096 complex IQ samples.
+
+Stride
+~~~~~~
+
+Stride is the distance the window moves before generating the next window.
+
+Current Value
+
+    Stride = 2048 IQ Samples
+
+Since the stride is smaller than the window size, neighbouring windows overlap.
+
+Example
+
+Window Size = 4096
+Stride      = 2048
+
+Window 1
+
+[================]
+
+Window 2
+
+        [================]
+
+Window 3
+
+                [================]
+
+The overlapping region contains 2048 shared IQ samples.
+
+Current Configuration
+---------------------
+
+Window Size : 4096
+
+Stride      : 2048
+
+Overlap     : 50%
+
+Reason for Choosing Window Size
+-------------------------------
+
+A window size of 4096 IQ samples was selected as the baseline configuration.
+
+This value
+
+* captures sufficient temporal RF information,
+* provides fixed-size inputs for the CNN,
+* fits comfortably into memory,
+* generates a large number of training samples from each recording.
+
+The window size is treated as a tunable hyperparameter and may be evaluated
+experimentally in future work.
+
+Reason for Choosing 50% Overlap
+-------------------------------
+
+RF transmissions are continuous and do not necessarily align with window
+boundaries.
+
+Using overlapping windows ensures that signal characteristics occurring near
+the end of one window also appear near the beginning of the next.
+
+Benefits include
+
+* Reduced boundary information loss.
+* Better representation of complete RF patterns.
+* Increased number of training samples.
+* Improved robustness to signal alignment.
+
+Although overlapping windows increase preprocessing time and storage
+requirements, they provide better coverage of the original recording and are
+commonly evaluated in RF signal processing applications.
+
+Data Leakage Prevention
+-----------------------
+
+Window generation is performed only after splitting recordings into
+
+* Training
+* Validation
+* Testing
+
+Correct Workflow
+
+Raw Recordings
+
+↓
+
+Train / Validation / Test Split
+
+↓
+
+Window Generation
+
+↓
+
+Model Training
+
+This prevents overlapping windows originating from the same recording from
+appearing in different datasets.
+
+Implementation
+--------------
+
+Function
+
+    create_windows(iq, window_size, stride)
+
+Input
+
+* Complex IQ signal
+* Shape: (N,)
+
+Output
+
+* Complex IQ windows
+* Shape: (Number of Windows, Window Size)
+
+Testing
+-------
+
+The implementation has been verified using
+
+* DJI Inspire 2
+* DJI Mavic Pro
+* Wi-Fi
+* LTE
+* 5G NR
+
+Validation includes
+
+* Windows are generated successfully.
+* Window size is correct.
+* Output remains complex.
+* Output is two-dimensional.
+* Windows are generated for every dataset.
+
+Future Work
+-----------
+
+Future experiments will compare multiple configurations.
+
+Window Sizes
+
+* 2048
+* 4096
+* 8192
+
+Stride Values
+
+* 4096 (0% overlap)
+* 2048 (50% overlap)
+* 1024 (75% overlap)
+
+Performance will be evaluated using
+
+* Accuracy
+* Precision
+* Recall
+* F1 Score
+* Training Time
+* Inference Time
