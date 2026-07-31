@@ -1,0 +1,89 @@
+Loaders
+=======
+
+Purpose
+-------
+
+This module is responsible for reading raw RF recordings and converting them
+into complex I/Q samples that can be consumed by the preprocessing pipeline.
+
+Supported Formats
+-----------------
+
+Current supported formats:
+
+* .bin
+    DroneRF dataset
+
+* .data
+    Wireless RF dataset
+    - Wi-Fi
+    - LTE
+    - 5G NR
+
+Returned Format
+---------------
+
+Both loaders return
+
+* numpy.ndarray
+* dtype: complex64
+* shape: (N,)
+
+Pipeline
+--------
+
+Raw File
+
+↓
+
+Interleaved int16
+
+↓
+
+Separate I and Q channels
+
+↓
+
+Complex IQ
+
+↓
+
+Return numpy array
+
+Functions
+---------
+
+load_bin(path)
+
+    Reads DroneRF .bin recordings.
+
+load_data(path)
+
+    Reads Wireless RF .data recordings.
+
+Notes
+-----
+
+* Files are stored as interleaved int16 IQ samples.
+* No normalization is performed.
+* No windowing is performed.
+* No preprocessing is applied.
+
+Testing
+-------
+
+Verified using
+
+* DJI Inspire
+* DJI Phantom
+* Wi-Fi
+* LTE
+* 5G NR
+
+Future Work
+-----------
+
+* Metadata extraction
+* Automatic format detection
+* SigMF support
