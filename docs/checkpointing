@@ -1,0 +1,142 @@
+Checkpointing
+=============
+
+Purpose
+-------
+
+Save and restore the training state of the neural network.
+
+Checkpointing allows training to resume after interruption and preserves the
+best performing model for future inference.
+
+---
+
+Implementation
+--------------
+
+Each checkpoint stores
+
+* Current epoch.
+* Validation loss.
+* Model parameters.
+* Optimizer state.
+
+The checkpoint is written using PyTorch's serialization utilities.
+
+---
+
+Pipeline
+--------
+
+Training
+
+↓
+
+Validation
+
+↓
+
+Validation Loss
+
+↓
+
+Save Checkpoint
+
+↓
+
+Continue Training
+
+---
+
+Checkpoint Structure
+--------------------
+
+Each checkpoint contains
+
+* Epoch
+* Loss
+* Model State Dictionary
+* Optimizer State Dictionary
+
+These values are stored in a single dictionary.
+
+---
+
+Why Save the Model?
+-------------------
+
+Training deep neural networks can require significant time.
+
+Saving checkpoints prevents losing progress if training is interrupted.
+
+The saved model can also be reused for inference without retraining.
+
+---
+
+Why Save the Optimizer?
+-----------------------
+
+The optimizer stores internal training information such as momentum and
+adaptive learning statistics.
+
+Restoring the optimizer allows training to continue exactly where it stopped.
+
+Without saving the optimizer, resumed training behaves like a newly initialized
+optimizer.
+
+---
+
+Why Save the Epoch?
+-------------------
+
+The current epoch is stored to indicate the training progress.
+
+When resuming training, the next epoch can continue from the correct point
+instead of restarting.
+
+---
+
+Why Save the Loss?
+------------------
+
+Validation loss records the model's performance when the checkpoint was saved.
+
+This allows comparison between checkpoints and identification of the best
+performing model.
+
+---
+
+Loading
+-------
+
+Loading a checkpoint restores
+
+* Model weights.
+* Optimizer state.
+* Epoch number.
+* Validation loss.
+
+Training or inference can then continue using the restored model.
+
+---
+
+Testing
+-------
+
+The checkpoint implementation is verified by checking
+
+* Successful checkpoint creation.
+* Successful checkpoint loading.
+* Correct epoch restoration.
+* Correct loss restoration.
+
+---
+
+Future Work
+-----------
+
+* Save only the best validation model.
+* Periodically save checkpoints every N epochs.
+* Store training and validation accuracy.
+* Save learning rate scheduler state.
+* Support automatic checkpoint resumption.
