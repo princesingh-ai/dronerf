@@ -1,0 +1,448 @@
+DroneRF: Deep Learning Based RF Drone Detection
+===============================================
+
+Deep Learning Based RF Drone Detection using Raw IQ Samples
+
+Overview
+--------
+
+DroneRF is an open-source technical system designed to detect and classify
+unmanned aerial vehicle (UAV) radio frequency (RF) transmissions directly from
+raw In-Phase and Quadrature (IQ) signal samples. The system employs a
+one-dimensional Convolutional Neural Network (1D CNN) implemented in PyTorch to
+discriminate between RF signals emitted by drones and non-drone radio
+transmitters operating in identical or adjacent frequency bands.
+
+Unlike traditional RF detection methodologies that depend on hand-crafted
+feature extraction or conversion of signals into 2D time-frequency images
+(spectrograms), DroneRF ingests raw complex-valued time-series data directly.
+This document serves as the primary technical manual for the project, detailing
+system architecture, raw signal processing concepts, dataset organization,
+training pipelines, and design rationale.
+
+
+Purpose
+-------
+
+The purpose of this repository is to provide a reproducible, modular, and
+production-grade pipeline for RF-based drone detection. Low-altitude drone
+detection is critical for airspace security, privacy protection, and facility
+defense. Standard optical and acoustic detection systems suffer from severe
+limitations under degraded environmental conditions such as dense fog, nighttime
+operation, and long line-of-sight distances.
+
+Radio frequency telemetry provides an effective detection vector because commercial
+and custom drones continuously transmit high-frequency control signals and live
+video feeds to ground stations. DroneRF enables automated binary classification
+of these signals with low latency, providing a foundational baseline for spectral
+surveillance applications.
+
+
+Motivation
+----------
+
+Unmanned aerial vehicles have proliferated rapidly across commercial and
+recreational domains. However, unauthorized UAV operations pose critical security
+risks to airports, energy infrastructure, public events, and sensitive government
+facilities.
+
+Conventional detection technologies exhibit distinct technical vulnerabilities:
+
+1. Radar Systems: Small consumer drones present an extremely low Radar Cross
+   Section (RCS), making them difficult to distinguish from birds or background
+   clutter in urban environments.
+
+2. Optical Sensors (Cameras): Visual tracking requires unobstructed lines of
+   sight and adequate daylight. Performance degrades significantly in adverse
+   weather, low light, or complex visual backgrounds.
+
+3. Acoustic Arrays: Microphones are constrained by acoustic attenuation, low
+   effective range (<100 meters), and ambient acoustic noise (e.g., traffic,
+   wind, machinery).
+
+RF-based detection overcomes these limitations by monitoring the electromagnetic
+spectrum. Drones communicate with controllers using radio signals at specific
+carrier frequencies (typically 2.4 GHz and 5.8 GHz). By continuously sampling
+the raw radio spectrum, an automated system can detect the presence of drone
+transmissions regardless of optical visibility or acoustic noise.
+
+
+Problem Statement
+-----------------
+
+Given a high-speed digital sequence of raw complex IQ samples collected by a
+Software Defined Radio (SDR), determine whether the signal sequence contains an
+active drone transmission (Class 1: Drone) or background electromagnetic activity
+from non-drone radio sources (Class 0: Non-Drone).
+
+Formally, given an input tensor x of shape (2, N) representing N complex samples:
+
+    x = [ [ I_0, I_1, I_2, ..., I_{N-1} ],
+          [ Q_0, Q_1, Q_2, ..., Q_{N-1} ] ]
+
+The goal is to learn a decision function f(x) -> y where y in {0, 1}, minimizing
+the binary cross-entropy loss over a benchmark dataset of RF recordings.
+
+
+Radio Frequency (RF) Signal Fundamentals
+----------------------------------------
+
+This section explains fundamental radio frequency engineering concepts for readers
+with a Computer Science background who have not previously worked with wireless
+communication signals.
+
+What is an IQ Sample?
+~~~~~~~~~~~~~~~~~~~~~
+
+In radio communications, a high-frequency analog radio wave is converted into a
+digital format using Software Defined Radios (SDRs). A continuous radio wave has
+both an amplitude (strength) and a phase (position within its cycle).
+
+Expressing a radio wave directly as a single real number sequence loses critical
+phase information necessary to demodulate complex digital signals. Therefore, radio
+receivers digitize signals into two orthogonal components:
+
+1. In-Phase Component (I): The signal component that is aligned with the reference
+   local oscillator phase (cos wave).
+
+2. Quadrature Component (Q): The signal component that is phase-shifted by 90
+   degrees relative to the reference phase (sin wave).
+
+Together, the In-Phase and Quadrature values form a complex number:
+
+    Signal Sample = I + jQ
+
+where j is the imaginary unit (j = sqrt(-1)).
+
+Representation in PyTorch Tensors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In a digital computer, a sequence of N complex IQ samples is represented as a 2D
+real-valued array where Channel 0 contains the real part (I) and Channel 1 contains
+the imaginary part (Q):
+
+    +-----------------------------------------------------------+
+    | Channel 0 (I): [ I_0,  I_1,  I_2,  I_3,  ...,  I_{N-1} ]  |
+    | Channel 1 (Q): [ Q_0,  Q_1,  Q_2,  Q_3,  ...,  Q_{N-1} ]  |
+    +-----------------------------------------------------------+
+
+Why Process Raw IQ Samples Directly?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Traditional signal processing converts raw IQ time series into 2D frequency
+spectrograms using the Short-Time Fourier Transform (STFT). While spectrograms
+visualize frequency changes over time, they introduce significant engineering
+tradeoffs:
+
+* Spectrogram generation introduces windowing artifacts and resolution tradeoffs
+  governed by Heisenberg's Uncertainty Principle (time resolution vs frequency
+  resolution).
+* STFT computation adds latency and memory overhead prior to model inference.
+* Phase relationships between consecutive samples are partially lost in magnitude
+  spectrograms.
+
+By training a 1D Convolutional Neural Network directly on raw 2D tensors of shape
+(2, N), the model learns optimal phase and frequency filtering operations
+end-to-end directly from data.
+
+
+Features
+--------
+
+* Direct Raw IQ Processing: End-to-end classification on 2-channel complex time
+  series without STFT or spectrogram preprocessing.
+* Memory-Efficient Data Pipeline: Memory-mapped disk reads (`mmap_mode="r"`) using
+  NumPy and PyTorch `DataLoader` to train on large RF binary files without loading
+  entire datasets into RAM.
+* Data Leakage Prevention: File-level dataset splitting guarantees that overlapping
+  sliding windows from the same raw recording never leak between training,
+  validation, and test splits.
+* Efficient 1D CNN Architecture: Progressive kernel sizes (7 -> 5 -> 3) with batch
+  normalization, ReLU activation, max pooling, and adaptive average pooling.
+* Numerical Stability: Classification uses raw unscaled output logits combined with
+  PyTorch `BCEWithLogitsLoss` to prevent floating-point underflow/overflow.
+* Cross-Platform Hardware Acceleration: Automatic device selection targeting CUDA
+  GPUs, Apple Silicon MPS acceleration, or multithreaded CPU fallback.
+
+
+Repository Structure
+--------------------
+
+The project repository is structured into modular Python packages:
+
+    dronerf/
+    ├── data_processing/        # Signal loading, dataset splitting, and windowing
+    │   ├── __init__.py
+    │   ├── loaders.py          # Binary file parsers (.bin and .data formats)
+    │   ├── preprocessing.py    # Sliding window extraction & peak normalization
+    │   ├── save.py             # File-level window generation & disk saving
+    │   └── split.py            # Stratified recording-level dataset splitting
+    ├── datasets/               # PyTorch Dataset wrappers
+    │   ├── __init__.py
+    │   └── rf_dataset.py       # Memory-mapped RF window Dataset implementation
+    ├── models/                 # Neural network model definitions
+    │   ├── __init__.py
+    │   └── cnn1d.py            # 1D Convolutional Neural Network (DroneCNN)
+    ├── training/               # Model training, evaluation, and checkpointing
+    │   ├── __init__.py
+    │   ├── check_points.py     # Atomic PyTorch model state saving and loading
+    │   ├── config.py           # Global hyperparameter and hardware defaults
+    │   ├── data_loader.py      # PyTorch DataLoader factory functions
+    │   ├── metrics.py          # Precision, Recall, Accuracy, and F1 calculation
+    │   ├── train.py            # Single-epoch training loop
+    │   └── validate.py         # Evaluation and validation loss computation
+    ├── tests/                  # Automated pytest verification suite
+    ├── docs/                   # Additional module-level technical documentation
+    ├── drone_rf/               # Input directory for raw drone binary recordings
+    ├── random_rf/              # Input directory for raw non-drone binary recordings
+    ├── processed/              # Preprocessed NumPy window dataset directory
+    ├── checkpoints/            # Model serialization directory (.pt weights)
+    ├── main.py                 # Primary entry point for training execution
+    └── pyproject.toml          # Project metadata and dependency definitions
+
+
+Quick Start
+-----------
+
+Prerequisites
+~~~~~~~~~~~~~
+
+* Python 3.10 or higher
+* `uv` or `pip` package manager
+
+Installation
+~~~~~~~~~~~~
+
+Clone the repository and install required dependencies:
+
+    git clone https://github.com/princesingh-ai/dronerf.git
+    cd dronerf
+    pip install -e .
+
+Executing Unit Tests
+~~~~~~~~~~~~~~~~~~~~
+
+Run the complete test suite using `pytest`:
+
+    pytest -v
+
+Processing Raw Data and Training
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Place raw binary drone recordings (`.bin`) into `drone_rf/`.
+2. Place raw binary non-drone recordings (`.data`) into `random_rf/`.
+3. Generate preprocessed windowed datasets:
+
+    python -c "from data_processing.save import create_dataset; create_dataset('drone_rf', 'random_rf', 'processed')"
+
+4. Execute model training:
+
+    python main.py
+
+
+Project Workflow
+----------------
+
+The complete data ingestion, processing, training, and inference pipeline follows
+a systematic sequential data flow:
+
+  Raw RF Binary Files (.bin / .data)
+                 │
+                 ▼
+  Raw IQ Sample Ingestion (loaders.py)
+                 │
+                 ▼
+  Recording-Level Data Split (split.py) [80% Train, 10% Val, 10% Test]
+                 │
+                 ▼
+  Sliding Window Extraction (preprocessing.py) [4096 samples, 50% overlap]
+                 │
+                 ▼
+  Disk Serialization (save.py) [NumPy .npy files in processed/]
+                 │
+                 ▼
+  PyTorch Dataset Loading (rf_dataset.py) [mmap_mode="r", Peak Normalization]
+                 │
+                 ▼
+  PyTorch DataLoader Assembly (data_loader.py) [Batching & Shuffling]
+                 │
+                 ▼
+  1D CNN Forward Pass (cnn1d.py) [Conv1D -> BatchNorm -> ReLU -> MaxPool]
+                 │
+                 ▼
+  Loss & Gradient Backpropagation (train.py) [BCEWithLogitsLoss & Adam]
+                 │
+                 ▼
+  Validation & Metric Evaluation (validate.py & metrics.py)
+                 │
+                 ▼
+  Atomic Model Checkpointing (check_points.py) [best_model.pt]
+
+
+High-Level Architecture
+-----------------------
+
+The DroneRF architectural pipeline is separated into three core domains: Signal
+Preprocessing, Dataset Management, and Neural Network Inference.
+
+              +-----------------------------------------------+
+              |            RAW SIGNAL INGESTION               |
+              |  Load int16 interleaved IQ from disk files    |
+              +-----------------------+-----------------------+
+                                      |
+                                      v
+              +-----------------------------------------------+
+              |           RECORDING-LEVEL SPLITTING           |
+              |  Shuffle raw files; split 80% / 10% / 10%    |
+              +-----------------------+-----------------------+
+                                      |
+                                      v
+              +-----------------------------------------------+
+              |          SLIDING WINDOW PROCESSING            |
+              |  Extract 4096-sample windows with 50% stride |
+              +-----------------------+-----------------------+
+                                      |
+                                      v
+              +-----------------------------------------------+
+              |          MEMORY-MAPPED DATASET READ           |
+              |  Lazy file loading & peak normalization       |
+              +-----------------------+-----------------------+
+                                      |
+                                      v
+              +-----------------------------------------------+
+              |          1D CNN CLASSIFICATION ENGINE         |
+              |  Extract temporal features & output logit     |
+              +-----------------------------------------------+
+
+
+Implementation
+--------------
+
+Signal Ingestion
+~~~~~~~~~~~~~~~~
+
+Raw binary recordings are stored as 16-bit signed integer arrays. The function
+`load_bin()` in `data_processing/loaders.py` reads these bytes and reconstructs
+the complex IQ signal:
+
+    I = raw_data[0::2].astype(np.float32)
+    Q = raw_data[1::2].astype(np.float32)
+    IQ = I + 1j * Q
+
+Sliding Window Slicing
+~~~~~~~~~~~~~~~~~~~~~~
+
+The function `create_windows()` in `data_processing/preprocessing.py` slices long
+signal arrays into uniform blocks of size 4096 with a default stride of 2048
+(50% overlap).
+
+Dataset Memory Mapping
+~~~~~~~~~~~~~~~~~~~~~~
+
+The `RFDataset` class in `datasets/rf_dataset.py` uses NumPy memory mapping
+(`mmap_mode="r"`). Instead of loading multi-gigabyte `.npy` files into RAM,
+samples are read directly from disk when requested by `__getitem__`, ensuring zero
+memory overflow during large-scale training.
+
+Peak Normalization
+~~~~~~~~~~~~~~~~~~
+
+Each 4096-sample IQ window is dynamically peak-normalized during indexing:
+
+    peak = np.max(np.abs(window))
+    normalized_window = window / peak if peak > 0 else window
+
+Model Architecture
+~~~~~~~~~~~~~~~~~~
+
+`DroneCNN` in `models/cnn1d.py` processes tensors of shape `(Batch, 2, 4096)`
+through three sequential 1D convolutional blocks followed by global adaptive
+average pooling and a linear classifier.
+
+
+Design Decisions
+----------------
+
+1. 1D CNN vs. 2D STFT Spectrograms
+   * Decision: Train directly on 1D complex raw IQ time-series tensors.
+   * Rationale: Avoids windowing distortion inherent to Fourier transforms,
+     preserves exact phase relationships between I and Q channels, reduces runtime
+     preprocessing latency, and allows end-to-end optimization.
+
+2. Recording-Level Dataset Splitting
+   * Decision: Shuffle and split raw binary files *before* window generation.
+   * Rationale: If windows were extracted first and then randomly shuffled, consecutive
+     50% overlapping windows from the exact same recording would end up in both the
+     training and test sets. This creates severe data leakage, resulting in inflated
+     validation accuracy that fails in real-world deployment.
+
+3. Window Length of 4096 Samples
+   * Decision: Set fixed window length to 4096 IQ samples.
+   * Rationale: At a standard SDR sampling rate of 20 MHz, 4096 samples represent a
+     time window of ~0.2 milliseconds. This provides sufficient temporal context to
+     capture drone telemetry packet bursts while remaining short enough to maintain low
+     detection latency.
+
+4. 50% Window Overlap (Stride = 2048)
+   * Decision: Use 50% stride during window generation.
+   * Rationale: Overlapping windows ensure that transient RF burst events occurring at
+     window boundaries are captured fully in at least one window, without doubling the
+     storage overhead excessively.
+
+5. Peak Normalization during DataLoader Access
+   * Decision: Perform normalization lazily inside `RFDataset.__getitem__` rather
+     than baking normalized floats into disk files.
+   * Rationale: Preserves uncorrupted raw amplitude data on disk, saves disk space,
+     and allows on-the-fly experimentations with alternative scaling algorithms.
+
+6. Unscaled Logits with BCEWithLogitsLoss
+   * Decision: Exclude final Sigmoid activation layer from `DroneCNN` and train using
+     `BCEWithLogitsLoss`.
+   * Rationale: PyTorch `BCEWithLogitsLoss` combines a Sigmoid layer and Binary
+     Cross-Entropy loss using the log-sum-exp trick, offering superior numerical
+     stability compared to manually chaining `Sigmoid()` and `BCELoss()`.
+
+
+Testing
+-------
+
+The repository includes a comprehensive unit test suite inside `tests/`:
+
+* `test_loaders.py`: Verifies int16 binary file parsing and complex signal assembly.
+* `test_preprocessing.py`: Validates window sizing, stride boundaries, and peak scaling.
+* `test_split.py`: Asserts zero overlap between train/val/test recording lists.
+* `test_rf_dataset.py`: Verifies memory-mapped dataset indexing and tensor shapes.
+* `test_cnn.py`: Ensures `DroneCNN` output tensor shape is strictly `(Batch, 1)`.
+* `test_train.py` & `test_validate.py`: Checks gradient propagation and loss calculation.
+* `test_checkpoints.py`: Tests state dict serialization and deserialization integrity.
+
+
+Documentation Links
+-------------------
+
+For detailed technical specifications, refer to the individual project manuals:
+
+* [ARCHITECTURE.md](ARCHITECTURE.md): Complete system module architecture, tensor shape tracking, control flows, and memory mapping.
+* [DATASET.md](DATASET.md): RF signal physics, dataset acquisition, file format specifications, and splitting logic.
+* [TRAINING.md](TRAINING.md): Loss formulations, optimization dynamics, metric implementations, and checkpoint management.
+
+
+References
+----------
+
+1. Radio-Frequency Control and Video Signal Recordings of Drones
+   Authors/Creators: Miika Vuorenmaa, Jaakko Marin, Mikko Heino, Matias Turunen, Taneli Riihonen
+   Link: https://zenodo.org/records/4264467
+
+2. Real-World Wireless Communication Dataset
+   Link: https://www.kaggle.com/datasets/siddss/real-world-wireless-communication-dataset?resource=download
+
+3. RFUAV Dataset
+   Link: https://huggingface.co/datasets/kitofrank/RFUAV
+
+
+
+License
+-------
+
+This project is released under the MIT Open Source License. Refer to the LICENSE file for details.
