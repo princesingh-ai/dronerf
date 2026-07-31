@@ -1,0 +1,97 @@
+Preprocessing
+=============
+
+Purpose
+-------
+
+Prepare raw RF recordings for machine learning by applying preprocessing
+operations before dataset generation.
+
+Current Pipeline
+----------------
+
+Raw IQ Signal
+↓
+Peak Normalization
+↓
+Window Generation (Upcoming)
+↓
+Dataset Split (Upcoming)
+↓
+Training Dataset
+
+Normalization
+-------------
+
+The first preprocessing stage is peak normalization.
+
+Each complex IQ recording is scaled by its maximum magnitude.
+
+Formula
+
+    IQ_normalized = IQ / max(abs(IQ))
+
+This ensures every recording has a maximum amplitude of 1 while preserving
+its relative amplitude and phase information.
+
+Implementation
+--------------
+
+Function
+
+    normalize(iq)
+
+Input
+
+* Complex IQ samples
+* numpy.ndarray
+* Shape: (N,)
+
+Output
+
+* Peak-normalized IQ samples
+* numpy.ndarray
+* Shape: (N,)
+* dtype: complex64
+
+Advantages
+----------
+
+* Stable numerical range
+* Faster neural network convergence
+* Preserves signal phase
+* Preserves relative amplitude relationships
+
+Testing
+-------
+
+Normalization verified on
+
+* DJI Inspire 2
+* DJI Mavic Pro
+* Wi-Fi (30 Mbps)
+* Wi-Fi (50 Mbps)
+* LTE (30 Mbps)
+* LTE (50 Mbps)
+* 5G NR
+
+Validation performed
+
+* Output remains complex.
+* Shape remains unchanged.
+* Maximum magnitude equals 1.
+* No NaN values produced.
+
+Limitations
+-----------
+
+Normalization is applied independently to each recording.
+
+No dataset-wide normalization is currently implemented.
+
+Future Work
+-----------
+
+* RMS normalization
+* Z-score normalization
+* Dataset-wide normalization
