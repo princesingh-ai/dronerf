@@ -279,7 +279,8 @@ dronerf/
 │   ├── train.py           # Single-epoch training loop
 │   ├── validate.py        # Validation loss evaluation loop
 │   ├── metrics.py         # Classification metrics (Accuracy, Precision, Recall, F1)
-│   └── check_points.py    # Model checkpoint saving and loading
+│   ├── check_points.py    # Model checkpoint saving and loading
+│   └── plots.py           # Plotting utilities (confusion matrix and loss curve plots)
 │
 ├── evaluation/            # Evaluation utilities
 │   └── confusion_matrix.py# Confusion matrix computation and display
@@ -359,6 +360,8 @@ Run model training using uv:
 
    uv run python main.py
 
+During training, loss values per epoch are tracked, and the loss curve plot is automatically saved (`docs/images/loss_curve.png`) via `training/plots.py`.
+
 Evaluating the Model:
 
 Evaluate trained checkpoint performance on test datasets:
@@ -370,6 +373,7 @@ This evaluation outputs:
 - Validation loss
 - Accuracy, Precision, Recall, and F1 Score
 - Confusion matrix (TP, TN, FP, FN counts via evaluation/confusion_matrix.py)
+- Confusion matrix plot (`docs/images/confusion_matrix.png` generated via `training/plots.py`)
 
 Testing & Inference on Unseen Data:
 
