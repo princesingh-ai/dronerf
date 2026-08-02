@@ -1,5 +1,5 @@
-DroneRF: Deep Learning Based RF Drone Detection
-===============================================
+DroneRF: Deep Learning Based RF Drone Detection (v1)
+=====================================================
 
 Deep Learning Based RF Drone Detection using Raw IQ Samples
 
@@ -7,8 +7,8 @@ Overview
 --------
 
 DroneRF is an open-source technical system designed to detect and classify
-unmanned aerial vehicle (UAV) radio frequency (RF) transmissions directly from
-raw In-Phase and Quadrature (IQ) signal samples. The system employs a
+unmanned aerial vehicle (UAV) and Drone radio frequency (RF) transmissions
+directly from raw In-Phase and Quadrature (IQ) signal samples. The system employs a
 one-dimensional Convolutional Neural Network (1D CNN) implemented in PyTorch to
 discriminate between RF signals emitted by drones and non-drone radio
 transmitters operating in identical or adjacent frequency bands.
@@ -20,31 +20,13 @@ This document serves as the primary technical manual for the project, detailing
 system architecture, raw signal processing concepts, dataset organization,
 training pipelines, and design rationale.
 
-
-Purpose
--------
-
-The purpose of this repository is to provide a reproducible, modular, and
-production-grade pipeline for RF-based drone detection. Low-altitude drone
-detection is critical for airspace security, privacy protection, and facility
-defense. Standard optical and acoustic detection systems suffer from severe
-limitations under degraded environmental conditions such as dense fog, nighttime
-operation, and long line-of-sight distances.
-
-Radio frequency telemetry provides an effective detection vector because commercial
-and custom drones continuously transmit high-frequency control signals and live
-video feeds to ground stations. DroneRF enables automated binary classification
-of these signals with low latency, providing a foundational baseline for spectral
-surveillance applications.
-
-
 Motivation
 ----------
 
-Unmanned aerial vehicles have proliferated rapidly across commercial and
-recreational domains. However, unauthorized UAV operations pose critical security
-risks to airports, energy infrastructure, public events, and sensitive government
-facilities.
+Unmanned aerial vehicles (UAVs) and Drones have proliferated rapidly across
+commercial and recreational domains. However, unauthorized UAV and Drone operations
+pose critical security risks to airports, energy infrastructure, public events,
+and sensitive government facilities.
 
 Conventional detection technologies exhibit distinct technical vulnerabilities:
 
@@ -61,28 +43,45 @@ Conventional detection technologies exhibit distinct technical vulnerabilities:
    wind, machinery).
 
 RF-based detection overcomes these limitations by monitoring the electromagnetic
-spectrum. Drones communicate with controllers using radio signals at specific
-carrier frequencies (typically 2.4 GHz and 5.8 GHz). By continuously sampling
-the raw radio spectrum, an automated system can detect the presence of drone
-transmissions regardless of optical visibility or acoustic noise.
+spectrum. Drones and UAVs communicate with controllers using radio signals at
+specific carrier frequencies (typically 2.4 GHz and 5.8 GHz). By continuously
+sampling the raw radio spectrum, an automated system can detect the presence of
+drone and UAV transmissions regardless of optical visibility or acoustic noise.
 
+High-Level Architecture
+-----------------------
 
-Problem Statement
------------------
+The DroneRF architectural pipeline is separated into three core domains: Signal
+Preprocessing, Dataset Management, and Neural Network Inference.
 
-Given a high-speed digital sequence of raw complex IQ samples collected by a
-Software Defined Radio (SDR), determine whether the signal sequence contains an
-active drone transmission (Class 1: Drone) or background electromagnetic activity
-from non-drone radio sources (Class 0: Non-Drone).
-
-Formally, given an input tensor x of shape (2, N) representing N complex samples:
-
-    x = [ [ I_0, I_1, I_2, ..., I_{N-1} ],
-          [ Q_0, Q_1, Q_2, ..., Q_{N-1} ] ]
-
-The goal is to learn a decision function f(x) -> y where y in {0, 1}, minimizing
-the binary cross-entropy loss over a benchmark dataset of RF recordings.
-
+              +-----------------------------------------------+
+              |            RAW SIGNAL INGESTION               |
+              |  Load int16 interleaved IQ from disk files    |
+              +-----------------------+-----------------------+
+                                      |
+                                      v
+              +-----------------------------------------------+
+              |           RECORDING-LEVEL SPLITTING           |
+              |  Shuffle raw files; split 80% / 10% / 10%    |
+              +-----------------------+-----------------------+
+                                      |
+                                      v
+              +-----------------------------------------------+
+              |          SLIDING WINDOW PROCESSING            |
+              |  Extract 4096-sample windows with 50% stride |
+              +-----------------------+-----------------------+
+                                      |
+                                      v
+              +-----------------------------------------------+
+              |          MEMORY-MAPPED DATASET READ           |
+              |  Lazy file loading & peak normalization       |
+              +-----------------------+-----------------------+
+                                      |
+                                      v
+              +-----------------------------------------------+
+              |          1D CNN CLASSIFICATION ENGINE         |
+              |  Extract temporal features & output logit     |
+              +-----------------------------------------------+
 
 Radio Frequency (RF) Signal Fundamentals
 ----------------------------------------
@@ -121,10 +120,24 @@ In a digital computer, a sequence of N complex IQ samples is represented as a 2D
 real-valued array where Channel 0 contains the real part (I) and Channel 1 contains
 the imaginary part (Q):
 
-    +-----------------------------------------------------------+
-    | Channel 0 (I): [ I_0,  I_1,  I_2,  I_3,  ...,  I_{N-1} ]  |
-    | Channel 1 (Q): [ Q_0,  Q_1,  Q_2,  Q_3,  ...,  Q_{N-1} ]  |
-    +-----------------------------------------------------------+
+    +------------+-----------------------------------------------------------------+
+    | Channel    | Sample Sequence (Length = N)                                    |
+    +============+=================================================================+
+    | Ch 0 (I)   | [  I_0  |  I_1  |  I_2  |  I_3  |  ...  |  I_{N-2}  |  I_{N-1}] |
+    +------------+-----------------------------------------------------------------+
+    | Ch 1 (Q)   | [  Q_0  |  Q_1  |  Q_2  |  Q_3  |  ...  |  Q_{N-2}  |  Q_{N-1}] |
+    +------------+-----------------------------------------------------------------+
+
+In PyTorch tensor notation, an individual signal window has a shape of [2, N],
+and a mini-batch of signal windows has a shape of [B, 2, N]:
+
+    +-------------------+------------------------------------------------------+
+    | Dimension         | Description                                          |
+    +===================+======================================================+
+    | Batch Size (B)    | Number of sampled signal windows per batch           |
+    | Channels (C = 2)  | 2 channels (Ch 0: In-Phase, Ch 1: Quadrature)        |
+    | Length (N = 4096) | Discrete time samples per sliding window             |
+    +-------------------+------------------------------------------------------+
 
 Why Process Raw IQ Samples Directly?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -144,238 +157,6 @@ tradeoffs:
 By training a 1D Convolutional Neural Network directly on raw 2D tensors of shape
 (2, N), the model learns optimal phase and frequency filtering operations
 end-to-end directly from data.
-
-
-Features
---------
-
-* Direct Raw IQ Processing: End-to-end classification on 2-channel complex time
-  series without STFT or spectrogram preprocessing.
-* Memory-Efficient Data Pipeline: Memory-mapped disk reads (`mmap_mode="r"`) using
-  NumPy and PyTorch `DataLoader` to train on large RF binary files without loading
-  entire datasets into RAM.
-* Data Leakage Prevention: File-level dataset splitting guarantees that overlapping
-  sliding windows from the same raw recording never leak between training,
-  validation, and test splits.
-* Efficient 1D CNN Architecture: Progressive kernel sizes (7 -> 5 -> 3) with batch
-  normalization, ReLU activation, max pooling, and adaptive average pooling.
-* Numerical Stability: Classification uses raw unscaled output logits combined with
-  PyTorch `BCEWithLogitsLoss` to prevent floating-point underflow/overflow.
-* Cross-Platform Hardware Acceleration: Automatic device selection targeting CUDA
-  GPUs, Apple Silicon MPS acceleration, or multithreaded CPU fallback.
-
-
-Repository Structure
---------------------
-
-The project repository is structured into modular Python packages:
-
-    dronerf/
-    ├── data_processing/        # Signal loading, dataset splitting, and windowing
-    │   ├── __init__.py
-    │   ├── loaders.py          # Binary file parsers (.bin and .data formats)
-    │   ├── preprocessing.py    # Sliding window extraction & peak normalization
-    │   ├── save.py             # File-level window generation & disk saving
-    │   └── split.py            # Stratified recording-level dataset splitting
-    ├── datasets/               # PyTorch Dataset wrappers
-    │   ├── __init__.py
-    │   └── rf_dataset.py       # Memory-mapped RF window Dataset implementation
-    ├── models/                 # Neural network model definitions
-    │   ├── __init__.py
-    │   └── cnn1d.py            # 1D Convolutional Neural Network (DroneCNN)
-    ├── training/               # Model training, evaluation, and checkpointing
-    │   ├── __init__.py
-    │   ├── check_points.py     # Atomic PyTorch model state saving and loading
-    │   ├── config.py           # Global hyperparameter and hardware defaults
-    │   ├── data_loader.py      # PyTorch DataLoader factory functions
-    │   ├── metrics.py          # Precision, Recall, Accuracy, and F1 calculation
-    │   ├── train.py            # Single-epoch training loop
-    │   └── validate.py         # Evaluation and validation loss computation
-    ├── tests/                  # Automated pytest verification suite
-    ├── docs/                   # Additional module-level technical documentation
-    ├── drone_rf/               # Input directory for raw drone binary recordings
-    ├── random_rf/              # Input directory for raw non-drone binary recordings
-    ├── processed/              # Preprocessed NumPy window dataset directory
-    ├── checkpoints/            # Model serialization directory (.pt weights)
-    ├── main.py                 # Primary entry point for training execution
-    └── pyproject.toml          # Project metadata and dependency definitions
-
-
-Quick Start
------------
-
-Prerequisites
-~~~~~~~~~~~~~
-
-* Python 3.10 or higher
-* `uv` package manager
-
-To install `uv` on macOS via Homebrew:
-
-    brew install uv
-
-Installation
-~~~~~~~~~~~~
-
-Clone the repository and sync dependencies using `uv`:
-
-    git clone https://github.com/princesingh-ai/dronerf.git
-    cd dronerf
-    uv sync
-
-Executing Unit Tests
-~~~~~~~~~~~~~~~~~~~~
-
-Run the complete test suite using `uv`:
-
-    uv run pytest -v
-
-Processing Raw Data, Training, and Evaluation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1. Place raw binary drone recordings (`.bin`) into `drone_rf/`.
-2. Place raw binary non-drone recordings (`.data`) into `random_rf/`.
-3. Generate preprocessed windowed datasets:
-
-    uv run python -c "from data_processing.save import create_dataset; create_dataset('drone_rf', 'random_rf', 'processed')"
-
-4. Execute model training:
-
-    uv run python main.py
-
-5. Evaluate trained checkpoint on test dataset:
-
-    uv run python evaluate.py
-
-6. Perform inference prediction on a raw RF recording:
-
-    uv run python predict.py drone_rf/DJI_mavic_pro_2G.bin
-
-
-Evaluation Results
-------------------
-
-Model Evaluation Metrics
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Performance metrics evaluated on the test set for Epoch 3 checkpoint:
-
-* Checkpoint Epoch : 3
-* Validation Loss  : 0.0158
-* Accuracy         : 0.9956 (99.56%)
-* Precision        : 0.9970 (99.70%)
-* Recall           : 0.9978 (99.78%)
-* F1 Score         : 0.9974 (99.74%)
-
-Confusion Matrix
-~~~~~~~~~~~~~~~~
-
-```
-               Predicted
-               Drone   Non-Drone
-Drone          97438   216
-Non-Drone      296     19232
-```
-
-Sample Inference Predictions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1. DJI Mavic Pro 2.4 GHz RF Recording (`drone_rf/DJI_mavic_pro_2G.bin`):
-
-    $ uv run python predict.py drone_rf/DJI_mavic_pro_2G.bin
-    Windows              : 58592
-    Average Probability  : 0.9930
-    Prediction           : Drone
-
-2. Yuneec Typhoon H 5.8 GHz RF Recording (`Yuneec_typhoon_h_5G.bin`):
-
-    $ uv run python predict.py Yuneec_typhoon_h_5G.bin
-    Windows              : 48827
-    Average Probability  : 0.9894
-    Prediction           : Drone
-
-3. Non-Drone Wi-Fi 802.11ax RF Recording (`random_rf/Wi-Fi/802_11ax_mcs7_50mbps/32274CA-015-D20211123T131300M012278.data`):
-
-    $ uv run python predict.py random_rf/Wi-Fi/802_11ax_mcs7_50mbps/32274CA-015-D20211123T131300M012278.data
-    Windows              : 9764
-    Average Probability  : 0.1327
-    Prediction           : Non-Drone
-
-
-Project Workflow
-----------------
-
-The complete data ingestion, processing, training, and inference pipeline follows
-a systematic sequential data flow:
-
-  Raw RF Binary Files (.bin / .data)
-                 │
-                 ▼
-  Raw IQ Sample Ingestion (loaders.py)
-                 │
-                 ▼
-  Recording-Level Data Split (split.py) [80% Train, 10% Val, 10% Test]
-                 │
-                 ▼
-  Sliding Window Extraction (preprocessing.py) [4096 samples, 50% overlap]
-                 │
-                 ▼
-  Disk Serialization (save.py) [NumPy .npy files in processed/]
-                 │
-                 ▼
-  PyTorch Dataset Loading (rf_dataset.py) [mmap_mode="r", Peak Normalization]
-                 │
-                 ▼
-  PyTorch DataLoader Assembly (data_loader.py) [Batching & Shuffling]
-                 │
-                 ▼
-  1D CNN Forward Pass (cnn1d.py) [Conv1D -> BatchNorm -> ReLU -> MaxPool]
-                 │
-                 ▼
-  Loss & Gradient Backpropagation (train.py) [BCEWithLogitsLoss & Adam]
-                 │
-                 ▼
-  Validation & Metric Evaluation (validate.py & metrics.py)
-                 │
-                 ▼
-  Atomic Model Checkpointing (check_points.py) [best_model.pt]
-
-
-High-Level Architecture
------------------------
-
-The DroneRF architectural pipeline is separated into three core domains: Signal
-Preprocessing, Dataset Management, and Neural Network Inference.
-
-              +-----------------------------------------------+
-              |            RAW SIGNAL INGESTION               |
-              |  Load int16 interleaved IQ from disk files    |
-              +-----------------------+-----------------------+
-                                      |
-                                      v
-              +-----------------------------------------------+
-              |           RECORDING-LEVEL SPLITTING           |
-              |  Shuffle raw files; split 80% / 10% / 10%    |
-              +-----------------------+-----------------------+
-                                      |
-                                      v
-              +-----------------------------------------------+
-              |          SLIDING WINDOW PROCESSING            |
-              |  Extract 4096-sample windows with 50% stride |
-              +-----------------------+-----------------------+
-                                      |
-                                      v
-              +-----------------------------------------------+
-              |          MEMORY-MAPPED DATASET READ           |
-              |  Lazy file loading & peak normalization       |
-              +-----------------------+-----------------------+
-                                      |
-                                      v
-              +-----------------------------------------------+
-              |          1D CNN CLASSIFICATION ENGINE         |
-              |  Extract temporal features & output logit     |
-              +-----------------------------------------------+
-
 
 Implementation
 --------------
@@ -421,7 +202,6 @@ Model Architecture
 through three sequential 1D convolutional blocks followed by global adaptive
 average pooling and a linear classifier.
 
-
 Design Decisions
 ----------------
 
@@ -464,6 +244,209 @@ Design Decisions
      Cross-Entropy loss using the log-sum-exp trick, offering superior numerical
      stability compared to manually chaining `Sigmoid()` and `BCELoss()`.
 
+Repository Structure
+--------------------
+
+Below is the directory layout of the DroneRF project:
+
+dronerf/
+├── main.py                # Main script to train the DroneCNN model end-to-end
+├── evaluate.py            # Script to evaluate trained checkpoints on test datasets
+├── predict.py             # Script to run single-sample inference on unseen RF data
+├── pyproject.toml         # Environment configuration and project dependencies
+├── .gitignore             # Excludes large binary files, processed splits, and checkpoints
+│
+├── drone_rf/              # Primary raw dataset containing binary IQ recordings (.bin) for Drones
+├── processed/             # Processed 4096-sample windows separated into train/val/test
+├── random_rf/             # Primary raw dataset containing binary IQ recordings (.data) for 5G / LTE / Wi-Fi
+├── random_unseen_data/    # Spontaneously downloaded unseen data recordings for testing
+│
+├── data_processing/       # Raw signal parsing, slicing, normalization, and splitting
+│   ├── loaders.py         # Parses interleaved int16 raw binary IQ signals
+│   ├── preprocessing.py   # Sliding window extraction and peak amplitude scaling
+│   ├── split.py           # Recording-level train/val/test file splitter
+│   └── save.py            # Saves generated window arrays to disk
+│
+├── datasets/              # PyTorch Dataset wrappers
+│   └── rf_dataset.py      # Custom RFDataset class for dynamic sample loading
+│
+├── models/                # Neural network architectures
+│   └── cnn1d.py           # 1D Convolutional Neural Network (DroneCNN) implementation
+│
+├── training/              # Training and evaluation engine
+│   ├── config.py          # Central configuration (Batch size, LR, Epochs, Paths)
+│   ├── data_loader.py     # PyTorch DataLoader wrapper
+│   ├── train.py           # Single-epoch training loop
+│   ├── validate.py        # Validation loss evaluation loop
+│   ├── metrics.py         # Classification metrics (Accuracy, Precision, Recall, F1)
+│   └── check_points.py    # Model checkpoint saving and loading
+│
+├── evaluation/            # Evaluation utilities
+│   └── confusion_matrix.py# Confusion matrix computation and display
+│
+├── checkpoints/           # Output directory for saved PyTorch model weights (.pt)
+└── docs/                  # Detailed architectural and module specification docs
+
+Dataset Storage & Management Strategy
+-------------------------------------
+
+DroneRF manages raw, processed, and external testing datasets using a clear storage
+and isolation strategy:
+
+1. Primary Raw Dataset (`drone_rf/`):
+   Contains raw binary (`.bin`) recordings of complex interleaved int16 IQ samples
+   captured across various drone models (DJI Inspire, Mavic, Phantom, Matrice) operating
+   on 2.4 GHz and 5.8 GHz frequency bands.
+
+2. Processed Window Datasets (`processed/`):
+   The preprocessing pipeline parses raw binary files, slices signals into 4096-sample
+   sliding windows with 50% overlap, normalizes peak amplitudes, and saves the output
+   into isolated `train/`, `validation/`, and `test/` subdirectories. Splitting is done
+   at the recording file level to prevent data leakage between splits.
+
+3. Spontaneously Downloaded Testing Datasets:
+   To evaluate how well the model generalizes to real-world conditions, two extra
+   dataset folders are maintained:
+   - `random_rf/`: Contains raw binary IQ recordings in `.data` format for 5G, LTE, and
+     Wi-Fi datasets downloaded spontaneously to verify that non-drone background radio
+     transmissions are correctly classified.
+   - `random_unseen_data/`: Spontaneously downloaded raw binary/IQ recordings of
+     unseen drone models (e.g., Parrot Mambo, Yuneec Typhoon) used for direct out-of-
+     distribution model testing using `predict.py`.
+
+4. Git Hygiene (`.gitignore`):
+   All large binary data directories (`drone_rf/`, `processed/`, `random_rf/`,
+   `random_unseen_data/`) and model checkpoints (`checkpoints/`) are strictly ignored
+   in `.gitignore` to keep the codebase lightweight and clean.
+
+Quick Start
+-----------
+
+Prerequisites:
+- Python Version: 3.13 (specified in .python-version)
+- Package & Environment Manager: uv (Astral uv is used for fast dependency management)
+
+Installing uv:
+
+1. macOS (Recommended via Homebrew):
+   brew install uv
+
+   Documentation & Installation Guide for macOS:
+   https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_1
+
+2. Windows (via PowerShell):
+   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+   Documentation & Installation Guide for Windows:
+   https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_2
+
+Setting Up Dependencies:
+
+Simply synchronize the environment and install all dependencies:
+
+   uv sync
+
+Configuration:
+
+Before training, you can customize hyperparameters (epochs, batch size, learning rate,
+dataset paths, and checkpoint paths) in:
+
+   training/config.py
+
+Training the Model:
+
+Run model training using uv:
+
+   uv run python main.py
+
+Evaluating the Model:
+
+Evaluate trained checkpoint performance on test datasets:
+
+   uv run python evaluate.py
+
+This evaluation outputs:
+- Checkpoint epoch
+- Validation loss
+- Accuracy, Precision, Recall, and F1 Score
+- Confusion matrix (TP, TN, FP, FN counts via evaluation/confusion_matrix.py)
+
+Testing & Inference on Unseen Data:
+
+Run inference on raw signal recording files (.bin or .data formats):
+
+   uv run python predict.py <path_to_data_file>
+
+Example:
+   uv run python predict.py random_unseen_data/Parrot_mambo_video_2G.bin
+
+Evaluation Results
+------------------
+
+Model Evaluation Metrics
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Performance metrics evaluated on the test set for Epoch 3 checkpoint:
+
++----------------------+------------------+------------------+
+| Metric               | Raw Value        | Percentage       |
++======================+==================+==================+
+| Checkpoint Epoch     | 3                | -                |
+| Validation Loss      | 0.0158           | -                |
+| Accuracy             | 0.9956           | 99.56%           |
+| Precision            | 0.9970           | 99.70%           |
+| Recall               | 0.9978           | 99.78%           |
+| F1 Score             | 0.9974           | 99.74%           |
++----------------------+------------------+------------------+
+
+Confusion Matrix
+~~~~~~~~~~~~~~~~
+
++----------------------+-------------------------------------------------------+
+|                      |                       PREDICTED                       |
+| ACTUAL CLASS         +---------------------------+---------------------------+
+|                      | Drone                     | Non-Drone                 |
++======================+===========================+===========================+
+| Drone                | 97,438 (True Positive)    | 216 (False Negative)      |
++----------------------+---------------------------+---------------------------+
+| Non-Drone            | 296 (False Positive)      | 19,232 (True Negative)    |
++----------------------+---------------------------+---------------------------+
+
+Sample Inference Predictions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
++----+----------------------------------+-----------------------+-------------+------------------+----------------+
+| #  | Target Signal Description        | Recording File Path   | Windows     | Avg Probability  | Prediction     |
++====+==================================+=======================+=============+==================+================+
+| 1. | DJI Mavic Pro (2.4 GHz)          | drone_rf/             | 58,592      | 0.9930 (99.30%)  | Drone          |
+|    |                                  | DJI_mavic_pro_2G.bin  |             |                  |                |
++----+----------------------------------+-----------------------+-------------+------------------+----------------+
+| 2. | Yuneec Typhoon H (5.8 GHz)       | random_unseen_data/   | 48,827      | 0.9894 (98.94%)  | Drone          |
+|    |                                  | Yuneec_typhoon_h_5G...|             |                  |                |
++----+----------------------------------+-----------------------+-------------+------------------+----------------+
+| 3. | Wi-Fi 802.11ax (Non-Drone)       | random_rf/Wi-Fi/      | 9,764       | 0.1327 (13.27%)  | Non-Drone      |
+|    |                                  | 802_11ax_...data      |             |                  |                |
++----+----------------------------------+-----------------------+-------------+------------------+----------------+
+
+Command Invocations & Execution Logs:
+
+1. DJI Mavic Pro Inference:
+   $ uv run python predict.py drone_rf/DJI_mavic_pro_2G.bin
+   Windows              : 58592
+   Average Probability  : 0.9930
+   Prediction           : Drone
+
+2. Yuneec Typhoon H Inference:
+   $ uv run python predict.py random_unseen_data/Yuneec_typhoon_h_5G.bin
+   Windows              : 48827
+   Average Probability  : 0.9894
+   Prediction           : Drone
+
+3. Wi-Fi 802.11ax Non-Drone Inference:
+   $ uv run python predict.py random_rf/Wi-Fi/802_11ax_mcs7_50mbps/32274CA-015-D20211123T131300M012278.data
+   Windows              : 9764
+   Average Probability  : 0.1327
+   Prediction           : Non-Drone
 
 Testing
 -------
@@ -478,16 +461,14 @@ The repository includes a comprehensive unit test suite inside `tests/`:
 * `test_train.py` & `test_validate.py`: Checks gradient propagation and loss calculation.
 * `test_checkpoints.py`: Tests state dict serialization and deserialization integrity.
 
-
 Documentation Links
 -------------------
 
 For detailed technical specifications, refer to the individual project manuals:
 
-* [ARCHITECTURE](ARCHITECTURE): Complete system module architecture, tensor shape tracking, control flows, and memory mapping.
-* [DATASET](DATASET): RF signal physics, dataset acquisition, file format specifications, and splitting logic.
-* [TRAINING_MANUAL](TRAINING_MANUAL): Loss formulations, optimization dynamics, metric implementations, and checkpoint management.
-
+* [ARCHITECTURE](./ARCHITECTURE): Complete system module architecture, tensor shape tracking, control flows, and memory mapping.
+* [DATASET](./DATASET): RF signal physics, dataset acquisition, file format specifications, and splitting logic.
+* [TRAINING_MANUAL](./TRAINING_MANUAL): Loss formulations, optimization dynamics, metric implementations, and checkpoint management.
 
 References
 ----------
@@ -502,9 +483,7 @@ References
 3. RFUAV Dataset
    Link: https://huggingface.co/datasets/kitofrank/RFUAV
 
+Note
+----
 
-
-License
--------
-
-This project is released under the MIT Open Source License. Refer to the LICENSE file for details.
+This is a baseline research project (v1) and will be updated soon.
