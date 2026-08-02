@@ -1,4 +1,5 @@
 import torch
+from training.plots import plot_confusion_matrix
 
 from evaluation.confusion_matrix import (
     confusion_matrix,
@@ -75,6 +76,12 @@ def evaluate():
 )
 
     print_confusion_matrix(
+        tp,
+        tn,
+        fp,
+        fn,
+    )
+    plot_confusion_matrix(
         tp,
         tn,
         fp,
