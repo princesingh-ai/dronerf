@@ -390,17 +390,17 @@ Evaluation Results
 Model Evaluation Metrics
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Performance metrics evaluated on the test set for Epoch 3 checkpoint:
+Performance metrics evaluated on the test set for Epoch 4 checkpoint:
 
 +----------------------+------------------+------------------+
 | Metric               | Raw Value        | Percentage       |
 +======================+==================+==================+
-| Checkpoint Epoch     | 3                | -                |
-| Validation Loss      | 0.0158           | -                |
-| Accuracy             | 0.9956           | 99.56%           |
-| Precision            | 0.9970           | 99.70%           |
-| Recall               | 0.9978           | 99.78%           |
-| F1 Score             | 0.9974           | 99.74%           |
+| Checkpoint Epoch     | 4                | -                |
+| Validation Loss      | 0.0114           | -                |
+| Accuracy             | 0.9960           | 99.60%           |
+| Precision            | 0.9980           | 99.80%           |
+| Recall               | 0.9972           | 99.72%           |
+| F1 Score             | 0.9976           | 99.76%           |
 +----------------------+------------------+------------------+
 
 Confusion Matrix
@@ -411,9 +411,9 @@ Confusion Matrix
 | ACTUAL CLASS         +---------------------------+---------------------------+
 |                      | Drone                     | Non-Drone                 |
 +======================+===========================+===========================+
-| Drone                | 97,438 (True Positive)    | 216 (False Negative)      |
+| Drone                | 97,377 (True Positive)    | 277 (False Negative)      |
 +----------------------+---------------------------+---------------------------+
-| Non-Drone            | 296 (False Positive)      | 19,232 (True Negative)    |
+| Non-Drone            | 192 (False Positive)      | 19,336 (True Negative)    |
 +----------------------+---------------------------+---------------------------+
 
 Sample Inference Predictions
