@@ -17,7 +17,7 @@ from training.data_loader import create_dataloaders
 from training.train import train_one_epoch
 from training.validate import validate
 from training.check_points import save_checkpoint
-
+from training.plots import plot_loss_curve
 
 def main():
     """Train the RF drone classifier."""
@@ -38,6 +38,9 @@ def main():
 
     best_validation_loss = float("inf")
 
+    train_losses = []
+    validation_losses = []
+
     for epoch in range(EPOCHS):
 
         train_loss = train_one_epoch(
@@ -52,6 +55,9 @@ def main():
             validation_loader,
             criterion,
         )
+        
+        train_losses.append(train_loss)
+        validation_losses.append(validation_loss)
 
         print(
             f"Epoch [{epoch + 1}/{EPOCHS}] "
@@ -72,6 +78,8 @@ def main():
 
             print("✓ Best model saved.")
 
+
+    plot_loss_curve(train_losses, validation_losses, output_path="docs/images/loss_curve.png")
 
 if __name__ == "__main__":
     main()
