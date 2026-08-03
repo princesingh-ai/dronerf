@@ -294,10 +294,14 @@ Dataset Storage & Management Strategy
 DroneRF manages raw, processed, and external testing datasets using a clear storage
 and isolation strategy:
 
-1. Primary Raw Dataset (`drone_rf/`):
+1. Primary Raw Dataset -> 1 (`drone_rf/`):
    Contains raw binary (`.bin`) recordings of complex interleaved int16 IQ samples
    captured across various drone models (DJI Inspire, Mavic, Phantom, Matrice) operating
    on 2.4 GHz and 5.8 GHz frequency bands.
+
+   Primary Raw Dataset -> 2 (`random_rf/`):
+   Contains raw binary (`.data`) recordings of complex interleaved int16 IQ samples
+   captured across 5G/ LTE(`30mbps/50mbps`)/ WI-FI(`30mbps/50mbps`).
 
 2. Processed Window Datasets (`processed/`):
    The preprocessing pipeline parses raw binary files, slices signals into 4096-sample
