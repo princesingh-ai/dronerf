@@ -71,3 +71,10 @@ def create_dataset(
         test_non_drone,
         output_dir / "test" / "non_drone",
     )
+
+if __name__ == "__main__":
+    create_dataset(
+        drone_path="drone_rf",
+        non_drone_path="random_rf",
+        output_dir="processed",
+    )
