@@ -1,9 +1,9 @@
 import torch
 
-BATCH_SIZE = 64
+BATCH_SIZE = 128
 LEARNING_RATE = 1e-3
-EPOCHS = 5
-NUM_WORKERS = 0
+EPOCHS = 10
+NUM_WORKERS = 16
 
 DEVICE = (
     "cuda"
