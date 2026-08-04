@@ -6,3 +6,5 @@ __init__/
 checkpoints
 processed/
 random_unseen_data/
+data_exploration.ipynb
+drone_iq/
