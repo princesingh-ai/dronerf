@@ -1,4 +1,5 @@
 from pathlib import Path
+from training.config import DEVICE
 
 import torch
 
@@ -39,6 +40,7 @@ def load_checkpoint(
 
     checkpoint = torch.load(
         path,
+        map_location=DEVICE,
         weights_only=False,
     )
 
