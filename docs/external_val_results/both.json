@@ -1,0 +1,909 @@
+{
+    "summary": {
+        "total_files": 100,
+        "correct": 88,
+        "accuracy": 0.88
+    },
+    "results": [
+        {
+            "windows": 58592,
+            "average_probability": 0.8665394016285569,
+            "prediction": "Drone",
+            "file": "AIR_1110_00.dat",
+            "drone": "AIR",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9356412898287781,
+            "prediction": "Drone",
+            "file": "AIR_1110_01.dat",
+            "drone": "AIR",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8849973245437958,
+            "prediction": "Drone",
+            "file": "AIR_1110_02.dat",
+            "drone": "AIR",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8751654740509889,
+            "prediction": "Drone",
+            "file": "AIR_1110_03.dat",
+            "drone": "AIR",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.933209337784165,
+            "prediction": "Drone",
+            "file": "AIR_1110_04.dat",
+            "drone": "AIR",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8046356781713787,
+            "prediction": "Drone",
+            "file": "AIR_1101_00.dat",
+            "drone": "AIR",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.2007308160594632,
+            "prediction": "Non-Drone",
+            "file": "AIR_1101_01.dat",
+            "drone": "AIR",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8114828921560443,
+            "prediction": "Drone",
+            "file": "AIR_1101_02.dat",
+            "drone": "AIR",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.17974358591394018,
+            "prediction": "Non-Drone",
+            "file": "AIR_1101_03.dat",
+            "drone": "AIR",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8319144298064804,
+            "prediction": "Drone",
+            "file": "AIR_1101_04.dat",
+            "drone": "AIR",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9396006855851012,
+            "prediction": "Drone",
+            "file": "AIR_1100_00.dat",
+            "drone": "AIR",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9239779721677689,
+            "prediction": "Drone",
+            "file": "AIR_1100_01.dat",
+            "drone": "AIR",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.24491217501211038,
+            "prediction": "Non-Drone",
+            "file": "AIR_1100_02.dat",
+            "drone": "AIR",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9002779645946631,
+            "prediction": "Drone",
+            "file": "AIR_1100_03.dat",
+            "drone": "AIR",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9243481870335771,
+            "prediction": "Drone",
+            "file": "AIR_1100_04.dat",
+            "drone": "AIR",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8506712862420839,
+            "prediction": "Drone",
+            "file": "DIS_1110_00.dat",
+            "drone": "DIS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8488140633727125,
+            "prediction": "Drone",
+            "file": "DIS_1110_01.dat",
+            "drone": "DIS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8936940133242942,
+            "prediction": "Drone",
+            "file": "DIS_1110_02.dat",
+            "drone": "DIS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8546476579958447,
+            "prediction": "Drone",
+            "file": "DIS_1110_03.dat",
+            "drone": "DIS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8664567473621244,
+            "prediction": "Drone",
+            "file": "DIS_1110_04.dat",
+            "drone": "DIS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.11831648006398823,
+            "prediction": "Non-Drone",
+            "file": "DIS_1100_00.dat",
+            "drone": "DIS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.10714797487084228,
+            "prediction": "Non-Drone",
+            "file": "DIS_1100_01.dat",
+            "drone": "DIS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.7659104779793102,
+            "prediction": "Drone",
+            "file": "DIS_1100_02.dat",
+            "drone": "DIS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.10205885126487736,
+            "prediction": "Non-Drone",
+            "file": "DIS_1100_03.dat",
+            "drone": "DIS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.11099652293783792,
+            "prediction": "Non-Drone",
+            "file": "DIS_1100_04.dat",
+            "drone": "DIS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 53338,
+            "average_probability": 0.943549554783425,
+            "prediction": "Drone",
+            "file": "INS_1110_00.dat",
+            "drone": "INS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9478840234078769,
+            "prediction": "Drone",
+            "file": "INS_1110_01.dat",
+            "drone": "INS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9863787985287219,
+            "prediction": "Drone",
+            "file": "INS_1110_02.dat",
+            "drone": "INS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9579895667068452,
+            "prediction": "Drone",
+            "file": "INS_1110_03.dat",
+            "drone": "INS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9751791537202258,
+            "prediction": "Drone",
+            "file": "INS_1110_04.dat",
+            "drone": "INS",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9092972514618611,
+            "prediction": "Drone",
+            "file": "INS_1101_00.dat",
+            "drone": "INS",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8984665503907909,
+            "prediction": "Drone",
+            "file": "INS_1101_01.dat",
+            "drone": "INS",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9107670832119708,
+            "prediction": "Drone",
+            "file": "INS_1101_02.dat",
+            "drone": "INS",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8993743756300252,
+            "prediction": "Drone",
+            "file": "INS_1101_03.dat",
+            "drone": "INS",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9361229177582069,
+            "prediction": "Drone",
+            "file": "INS_1101_04.dat",
+            "drone": "INS",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.3186767379210279,
+            "prediction": "Non-Drone",
+            "file": "INS_1100_00.dat",
+            "drone": "INS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.2971252337105013,
+            "prediction": "Non-Drone",
+            "file": "INS_1100_01.dat",
+            "drone": "INS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.2731973011370125,
+            "prediction": "Non-Drone",
+            "file": "INS_1100_02.dat",
+            "drone": "INS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.28441347837358083,
+            "prediction": "Non-Drone",
+            "file": "INS_1100_03.dat",
+            "drone": "INS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.2805977982388527,
+            "prediction": "Non-Drone",
+            "file": "INS_1100_04.dat",
+            "drone": "INS",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.725536729959815,
+            "prediction": "Drone",
+            "file": "MIN_1110_00.dat",
+            "drone": "MIN",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.7336094401404634,
+            "prediction": "Drone",
+            "file": "MIN_1110_01.dat",
+            "drone": "MIN",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.718290167682913,
+            "prediction": "Drone",
+            "file": "MIN_1110_02.dat",
+            "drone": "MIN",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.7680677657855435,
+            "prediction": "Drone",
+            "file": "MIN_1110_03.dat",
+            "drone": "MIN",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.7284279863820492,
+            "prediction": "Drone",
+            "file": "MIN_1110_04.dat",
+            "drone": "MIN",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.6662394098783344,
+            "prediction": "Drone",
+            "file": "MIN_1101_00.dat",
+            "drone": "MIN",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.7572855387552132,
+            "prediction": "Drone",
+            "file": "MIN_1101_01.dat",
+            "drone": "MIN",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.7369454867715198,
+            "prediction": "Drone",
+            "file": "MIN_1101_02.dat",
+            "drone": "MIN",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.6904092424143401,
+            "prediction": "Drone",
+            "file": "MIN_1101_03.dat",
+            "drone": "MIN",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.7231419671944056,
+            "prediction": "Drone",
+            "file": "MIN_1101_04.dat",
+            "drone": "MIN",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9578512405666135,
+            "prediction": "Drone",
+            "file": "MIN_1100_00.dat",
+            "drone": "MIN",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9540409989000668,
+            "prediction": "Drone",
+            "file": "MIN_1100_01.dat",
+            "drone": "MIN",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9216294875097785,
+            "prediction": "Drone",
+            "file": "MIN_1100_02.dat",
+            "drone": "MIN",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9263701386352997,
+            "prediction": "Drone",
+            "file": "MIN_1100_03.dat",
+            "drone": "MIN",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9322020455606633,
+            "prediction": "Drone",
+            "file": "MIN_1100_04.dat",
+            "drone": "MIN",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8517426159544548,
+            "prediction": "Drone",
+            "file": "MA1_1110_00.dat",
+            "drone": "MP1",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58593,
+            "average_probability": 0.8901232754930642,
+            "prediction": "Drone",
+            "file": "MA1_1110_01.dat",
+            "drone": "MP1",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8609709593601457,
+            "prediction": "Drone",
+            "file": "MA1_1110_02.dat",
+            "drone": "MP1",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9354243767789963,
+            "prediction": "Drone",
+            "file": "MA1_1110_03.dat",
+            "drone": "MP1",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9182769106292421,
+            "prediction": "Drone",
+            "file": "MA1_1110_04.dat",
+            "drone": "MP1",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9318054827176463,
+            "prediction": "Drone",
+            "file": "MA1_1101_00.dat",
+            "drone": "MP1",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.917095680583781,
+            "prediction": "Drone",
+            "file": "MA1_1101_01.dat",
+            "drone": "MP1",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.919468730486125,
+            "prediction": "Drone",
+            "file": "MA1_1101_02.dat",
+            "drone": "MP1",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9292677341474583,
+            "prediction": "Drone",
+            "file": "MA1_1101_03.dat",
+            "drone": "MP1",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8875055308787144,
+            "prediction": "Drone",
+            "file": "MA1_1101_04.dat",
+            "drone": "MP1",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8970594945135052,
+            "prediction": "Drone",
+            "file": "MA1_1100_00.dat",
+            "drone": "MP1",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8759469695387325,
+            "prediction": "Drone",
+            "file": "MA1_1100_01.dat",
+            "drone": "MP1",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9176177215807926,
+            "prediction": "Drone",
+            "file": "MA1_1100_02.dat",
+            "drone": "MP1",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9174884096102138,
+            "prediction": "Drone",
+            "file": "MA1_1100_03.dat",
+            "drone": "MP1",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.913009243341588,
+            "prediction": "Drone",
+            "file": "MA1_1100_04.dat",
+            "drone": "MP1",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.7806516471310117,
+            "prediction": "Drone",
+            "file": "MAV_1110_00.dat",
+            "drone": "MP2",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.7771611711513057,
+            "prediction": "Drone",
+            "file": "MAV_1110_01.dat",
+            "drone": "MP2",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.7881948175622255,
+            "prediction": "Drone",
+            "file": "MAV_1110_02.dat",
+            "drone": "MP2",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.7747651044684825,
+            "prediction": "Drone",
+            "file": "MAV_1110_03.dat",
+            "drone": "MP2",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.7847103416979665,
+            "prediction": "Drone",
+            "file": "MAV_1110_04.dat",
+            "drone": "MP2",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.9064630395785418,
+            "prediction": "Drone",
+            "file": "MAV_1101_00.dat",
+            "drone": "MP2",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9151641280030619,
+            "prediction": "Drone",
+            "file": "MAV_1101_01.dat",
+            "drone": "MP2",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8505235299974941,
+            "prediction": "Drone",
+            "file": "MAV_1101_02.dat",
+            "drone": "MP2",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.915035236973759,
+            "prediction": "Drone",
+            "file": "MAV_1101_03.dat",
+            "drone": "MP2",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8696068319897778,
+            "prediction": "Drone",
+            "file": "MAV_1101_04.dat",
+            "drone": "MP2",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8774749179681748,
+            "prediction": "Drone",
+            "file": "MAV_1100_00.dat",
+            "drone": "MP2",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8761258470143907,
+            "prediction": "Drone",
+            "file": "MAV_1100_01.dat",
+            "drone": "MP2",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.768345816532808,
+            "prediction": "Drone",
+            "file": "MAV_1100_02.dat",
+            "drone": "MP2",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.5473839086739191,
+            "prediction": "Drone",
+            "file": "MAV_1100_03.dat",
+            "drone": "MP2",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58594,
+            "average_probability": 0.8463452390068189,
+            "prediction": "Drone",
+            "file": "MAV_1100_04.dat",
+            "drone": "MP2",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9164633188587286,
+            "prediction": "Drone",
+            "file": "PHA_1110_00.dat",
+            "drone": "PHA",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9591362992332194,
+            "prediction": "Drone",
+            "file": "PHA_1110_01.dat",
+            "drone": "PHA",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8990567632839445,
+            "prediction": "Drone",
+            "file": "PHA_1110_02.dat",
+            "drone": "PHA",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.9521220501654645,
+            "prediction": "Drone",
+            "file": "PHA_1110_03.dat",
+            "drone": "PHA",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8901071815396933,
+            "prediction": "Drone",
+            "file": "PHA_1110_04.dat",
+            "drone": "PHA",
+            "flight_mode": "FY",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.6302510245898041,
+            "prediction": "Drone",
+            "file": "PHA_1101_00.dat",
+            "drone": "PHA",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.7313911803528148,
+            "prediction": "Drone",
+            "file": "PHA_1101_01.dat",
+            "drone": "PHA",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.6538593725288722,
+            "prediction": "Drone",
+            "file": "PHA_1101_02.dat",
+            "drone": "PHA",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.6955433724979819,
+            "prediction": "Drone",
+            "file": "PHA_1101_03.dat",
+            "drone": "PHA",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.7308176992941866,
+            "prediction": "Drone",
+            "file": "PHA_1101_04.dat",
+            "drone": "PHA",
+            "flight_mode": "HO",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8806728171862984,
+            "prediction": "Drone",
+            "file": "PHA_1100_00.dat",
+            "drone": "PHA",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8342406925875235,
+            "prediction": "Drone",
+            "file": "PHA_1100_01.dat",
+            "drone": "PHA",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8815995703879623,
+            "prediction": "Drone",
+            "file": "PHA_1100_02.dat",
+            "drone": "PHA",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8415438225856265,
+            "prediction": "Drone",
+            "file": "PHA_1100_03.dat",
+            "drone": "PHA",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        },
+        {
+            "windows": 58592,
+            "average_probability": 0.8232997649280932,
+            "prediction": "Drone",
+            "file": "PHA_1100_04.dat",
+            "drone": "PHA",
+            "flight_mode": "ON",
+            "interference": "BOTH"
+        }
+    ]
+}
