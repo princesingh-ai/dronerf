@@ -8,3 +8,5 @@ processed/
 random_unseen_data/
 data_exploration.ipynb
 drone_iq/
+external_val/
+.DS_Store
