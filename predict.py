@@ -3,7 +3,7 @@ import argparse
 import numpy as np
 import torch
 
-from data_processing.loaders import load_bin
+from data_processing.loaders import load_signal
 from data_processing.preprocessing import (
     create_windows,
     normalize,
@@ -15,11 +15,13 @@ from training.config import (
     MODEL_PATH,
 )
 
+from tqdm import tqdm
 
-def predict(file_path: str):
+
+def predict(file_path: str, show_progress: bool = True):
     """Predict whether an RF recording contains a drone."""
 
-    iq = load_bin(file_path)
+    iq = load_signal(file_path)
     windows = create_windows(iq)
     model = DroneCNN().to(DEVICE)
 
@@ -36,9 +38,12 @@ def predict(file_path: str):
     model.eval()
 
     probabilities = []
+
+    iterator = tqdm(windows, desc="Predicting", unit="window") if show_progress else windows
+
     with torch.no_grad():
 
-        for window in windows:
+        for window in iterator:
             window = normalize(window)
             window = np.stack(
                 (
@@ -59,14 +64,17 @@ def predict(file_path: str):
 
     average_probability = sum(probabilities) / len(probabilities)
 
+    prediction = ("Drone" if average_probability >= 0.5 else "Non-Drone")
+
     print(f"Windows              : {len(probabilities)}")
     print(f"Average Probability  : {average_probability:.4f}")
+    print(f"Prediction           : {prediction}")
 
-    if average_probability >= 0.5:
-        print("Prediction           : Drone")
-    else:
-        print("Prediction           : Non-Drone")
-
+    return {
+        "windows": len(probabilities),
+        "average_probability": float(average_probability),
+        "prediction": prediction,
+    }
 
 if __name__ == "__main__":
 
