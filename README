@@ -250,43 +250,56 @@ Repository Structure
 Below is the directory layout of the DroneRF project:
 
 dronerf/
-├── main.py                # Main script to train the DroneCNN model end-to-end
-├── evaluate.py            # Script to evaluate trained checkpoints on test datasets
-├── predict.py             # Script to run single-sample inference on unseen RF data
-├── pyproject.toml         # Environment configuration and project dependencies
-├── .gitignore             # Excludes large binary files, processed splits, and checkpoints
+├── main.py                    # Main script to train the DroneCNN model end-to-end
+├── evaluate.py                # Script to evaluate trained checkpoints on test datasets
+├── predict.py                 # Script to run single-sample inference on unseen RF data
+├── pyproject.toml             # Environment configuration and project dependencies
+├── .gitignore                 # Excludes large binary files, processed splits, and checkpoints
 │
-├── drone_rf/              # Primary raw dataset containing binary IQ recordings (.bin) for Drones
-├── processed/             # Processed 4096-sample windows separated into train/val/test
-├── random_rf/             # Primary raw dataset containing binary IQ recordings (.data) for 5G / LTE / Wi-Fi
-├── random_unseen_data/    # Spontaneously downloaded unseen data recordings for testing
+├── drone_rf/                  # Primary raw dataset containing binary IQ recordings (.bin) for Drones
+├── processed/                 # Processed 4096-sample windows separated into train/val/test
+├── random_rf/                 # Primary raw dataset containing binary IQ recordings (.data) for 5G / LTE / Wi-Fi
+├── random_unseen_data/        # Spontaneously downloaded unseen data recordings for testing
+├── external_val/              # External DroneDetect RF dataset recordings (.dat format)
 │
-├── data_processing/       # Raw signal parsing, slicing, normalization, and splitting
-│   ├── loaders.py         # Parses interleaved int16 raw binary IQ signals
-│   ├── preprocessing.py   # Sliding window extraction and peak amplitude scaling
-│   ├── split.py           # Recording-level train/val/test file splitter
-│   └── save.py            # Saves generated window arrays to disk
+├── data_processing/           # Raw signal parsing, slicing, normalization, and splitting
+│   ├── loaders.py             # Parses interleaved int16 raw binary IQ signals
+│   ├── preprocessing.py       # Sliding window extraction and peak amplitude scaling
+│   ├── split.py               # Recording-level train/val/test file splitter
+│   └── save.py                # Saves generated window arrays to disk
 │
-├── datasets/              # PyTorch Dataset wrappers
-│   └── rf_dataset.py      # Custom RFDataset class for dynamic sample loading
+├── datasets/                  # PyTorch Dataset wrappers
+│   └── rf_dataset.py          # Custom RFDataset class for dynamic sample loading
 │
-├── models/                # Neural network architectures
-│   └── cnn1d.py           # 1D Convolutional Neural Network (DroneCNN) implementation
+├── models/                    # Neural network architectures
+│   └── cnn1d.py               # 1D Convolutional Neural Network (DroneCNN) implementation
 │
-├── training/              # Training and evaluation engine
-│   ├── config.py          # Central configuration (Batch size, LR, Epochs, Paths)
-│   ├── data_loader.py     # PyTorch DataLoader wrapper
-│   ├── train.py           # Single-epoch training loop
-│   ├── validate.py        # Validation loss evaluation loop
-│   ├── metrics.py         # Classification metrics (Accuracy, Precision, Recall, F1)
-│   ├── check_points.py    # Model checkpoint saving and loading
-│   └── plots.py           # Plotting utilities (confusion matrix and loss curve plots)
+├── training/                  # Training and evaluation engine
+│   ├── config.py              # Central configuration (Batch size, LR, Epochs, Paths)
+│   ├── data_loader.py         # PyTorch DataLoader wrapper
+│   ├── train.py               # Single-epoch training loop
+│   ├── validate.py            # Validation loss evaluation loop
+│   ├── metrics.py             # Classification metrics (Accuracy, Precision, Recall, F1)
+│   ├── check_points.py        # Model checkpoint saving and loading
+│   └── plots.py               # Plotting utilities (confusion matrix and loss curve plots)
 │
-├── evaluation/            # Evaluation utilities
-│   └── confusion_matrix.py# Confusion matrix computation and display
+├── evaluation/                # Evaluation utilities and benchmark runner
+│   ├── benchmark.py           # Evaluates model on external validation datasets
+│   └── confusion_matrix.py    # Confusion matrix computation and display
 │
-├── checkpoints/           # Output directory for saved PyTorch model weights (.pt)
-└── docs/                  # Detailed architectural and module specification docs
+├── analysis/                  # Benchmark analysis and visualization tools
+│   ├── data.py                # Ingests JSON result records into DataFrames
+│   ├── overall_performance.py # Overall accuracy aggregation & bar plot generation
+│   ├── analyse_drones.py      # Per-drone accuracy evaluation & plotting
+│   ├── analyse_flight_mode.py # Accuracy by flight mode (FY, HO, ON)
+│   ├── analyse_confidence.py  # Prediction confidence distribution analysis
+│   ├── analyse_failures.py    # False negative failure mode analysis
+│   └── utils.py               # Visualization saving utilities
+│
+├── checkpoints/               # Output directory for saved PyTorch model weights (.pt)
+└── docs/                      # Detailed architectural and module specifications
+    ├── external_val_results/  # External evaluation JSON result outputs
+    └── external_val_plots/    # Exported benchmark CSV summaries and plot images
 
 Dataset Storage & Management Strategy
 -------------------------------------
