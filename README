@@ -423,7 +423,34 @@ Confusion Matrix
 External Validation Benchmarks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The model was evaluated across 390 external RF signal recordings spanning 7 drone models, 3 flight modes, and 4 RF interference conditions (Clean, Bluetooth, Wi-Fi, and Both), achieving an overall classification accuracy of 85.13% (332/390).
+The model was evaluated across 390 external RF signal recordings from the DroneDetect dataset spanning 7 drone models, 3 flight modes, and 4 RF interference conditions (Clean, Bluetooth, Wi-Fi, and Both), achieving an overall classification accuracy of 85.13% (332/390).
+
+External Dataset Specifications (DroneDetect)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Dataset Link: https://ieee-dataport.org/open-access/dronedetect-dataset-radio-frequency-dataset-unmanned-aerial-system-uas-signals-machine
+* Hardware Acquisition: Nuand BladeRF SDR using open-source GNU Radio software
+* Drone Models (7): DJI Mavic Air S (AIR), DJI Mavic Pro (MP1), DJI Mavic Pro 2 (MP2), DJI Inspire 2 (INS), DJI Mavic Mini (MIN), DJI Phantom 4 (PHA), Parrot Disco (DIS)
+* Signal Parameters:
+  - Center Frequency: 2.4375 GHz
+  - Signal Bandwidth: 28 MHz
+  - Sampling Rate: 60 MSps (60 Mbits/s)
+* Recording Specifications:
+  - Recording Duration: 2.0 seconds per raw recording file
+  - Complex IQ Samples: 1.2 x 10^8 complex samples per file
+  - File Format: Raw `.dat` binary files with complex data saved as 32-bit interleaved floats (`float32`)
+* Interference Subsets (4):
+  - `00`: Clean signal (No interference)
+  - `01`: Bluetooth interference only
+  - `10`: Wi-Fi interference only
+  - `11`: Bluetooth and Wi-Fi interference concurrently
+* Flight Modes (3):
+  - `ON`: Switched on (Idle state)
+  - `HO`: Hovering in place
+  - `FY`: Active flight
+* File Naming Scheme:
+  - Format: `<DRONE>_<INTERFERENCE><SUBINDEX>.dat`
+  - Example: `MIN_1100_00.dat` (Mavic Mini switched on with concurrent Bluetooth and Wi-Fi interference)
 
 Interference Scenario Benchmark
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -545,6 +572,9 @@ References
 
 3. RFUAV Dataset
    Link: https://huggingface.co/datasets/kitofrank/RFUAV
+
+4. DroneDetect Dataset (UAS RF Signals with Interference)
+   Link: https://ieee-dataport.org/open-access/dronedetect-dataset-radio-frequency-dataset-unmanned-aerial-system-uas-signals-machine
 
 Note
 ----
