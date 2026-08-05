@@ -1,6 +1,6 @@
 from pathlib import Path
 import numpy as np
-from data_processing.loaders import load_bin
+from data_processing.loaders import load_signals
 from data_processing.preprocessing import create_windows
 from data_processing.split import split_dataset
 
@@ -14,7 +14,7 @@ def process_split(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for file in files:
-        iq = load_bin(str(file))
+        iq = load_signals(str(file))
         windows = create_windows(iq)
         output_path = output_dir / f"{file.stem}.npy"
         np.save(output_path, windows)
