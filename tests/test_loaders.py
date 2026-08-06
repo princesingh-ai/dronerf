@@ -23,7 +23,7 @@ DATA_FILES = [
 ]
 
 DAT_FILES = [
-    "external_val/CLEAN/AIR_ON/AIR_0000_00.dat",
+    "external_val/BOTH/AIR_FY/AIR_1110_01.dat",
 ]
 
 
