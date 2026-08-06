@@ -67,5 +67,5 @@ def test_contains_both_classes():
     labels = set()
 
     for _, _, label in dataset.samples:
-        labels.add(label)
+        labels.add(label.item())
     assert labels == {0, 1}
