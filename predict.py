@@ -17,11 +17,21 @@ from training.config import (
 
 from tqdm import tqdm
 
+from data_processing.resample import resample_signal
 
-def predict(file_path: str, show_progress: bool = True):
+def predict(file_path: str, sample_rate: int | None = None, target_rate: int | None = None, show_progress: bool = True):
     """Predict whether an RF recording contains a drone."""
 
     iq = load_signal(file_path)
+
+    if (sample_rate is not None and target_rate is not None and sample_rate != target_rate):
+
+        print(f"Resampling: {sample_rate / 1e6:.0f} MSps -> " f"{target_rate / 1e6:.0f} MSps")
+        print(f"Original samples : {len(iq):,}")
+
+        iq = resample_signal(iq, original_rate=sample_rate, target_rate=target_rate)
+        print(f"Resampled samples: {len(iq):,}")
+
     windows = create_windows(iq)
     model = DroneCNN().to(DEVICE)
 
@@ -87,6 +97,18 @@ if __name__ == "__main__":
         help="Path to RF recording",
     )
 
+    parser.add_argument(
+    "--sample-rate",
+    type=int,
+    default=None,
+    help="Sampling rate of the input recording (Hz)")
+
+    parser.add_argument(
+    "--target-rate",
+    type=int,
+    default=None,
+    help="Target sampling rate before inference (Hz)")
+
     args = parser.parse_args()
 
-    predict(args.file)
+    predict(args.file, sample_rate=args.sample_rate, target_rate=args.target_rate)
