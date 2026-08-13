@@ -1,8 +1,6 @@
 name: Tests
 
 on:
-  workflow_dispatch:
-
   push:
 
   pull_request:
@@ -10,6 +8,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    env:
+      PYTHONPATH: ${{ github.workspace }}
 
     steps:
       - name: Checkout repository
@@ -27,4 +28,4 @@ jobs:
         run: uv sync
 
       - name: Run test suite
-        run: uv run pytest tests/unit
+        run: uv run pytest
