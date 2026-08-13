@@ -106,8 +106,8 @@ before dataset loading.
     and returns six discrete file arrays.
 
 * `data_processing/preprocessing.py`:
-  - `normalize(iq)`: Computes maximum absolute magnitude `peek = np.max(np.abs(iq))`
-    and divides the array by `peek`. Returns un-modified signal if peak is zero.
+  - `normalize(iq)`: Computes maximum absolute magnitude `peak = np.max(np.abs(iq))`
+    and divides the array by `peak`. Returns un-modified signal if peak is zero.
   - `create_windows(iq, window_size=4096, stride=2048)`: Iterates across the complex
     signal using a fixed stride, slicing sub-arrays of length 4096. Assembles the
     sliced arrays into a contiguous 2D NumPy array of shape `(Num_Windows, 4096)`.

@@ -4,10 +4,10 @@ def normalize(iq: np.ndarray) -> np.ndarray:
     """
     Normalize IQ signals to the range [-1, 1].
     """
-    peek = np.max(np.abs(iq))
-    if peek == 0:
+    peak = np.max(np.abs(iq))
+    if peak == 0:
         return iq
-    return iq / peek
+    return iq / peak
 
 
 def create_windows(iq: np.ndarray, window_size: int=4096, stride: int | None=None) -> np.ndarray:
