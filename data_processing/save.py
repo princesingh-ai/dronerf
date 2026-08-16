@@ -5,6 +5,7 @@ import numpy as np
 from data_processing.loaders import load_signal
 from data_processing.preprocessing import create_windows
 from data_processing.split import split_dataset
+from data_processing.resample import resample_signal
 
 # We need to extract the exact drone model from the filename.
 # Most drone files in the dataset look like "DJI_inspire_2_2G.bin" or "DJI_phantom_4_pro_plus_5G_1of2.bin".
@@ -28,6 +29,10 @@ def process_split(
 
     for file in files:
         iq = load_signal(str(file))
+        
+        # Downsample the raw 60 Msps recording to 20 Msps so it matches the live SDR hardware!
+        iq = resample_signal(iq, original_rate=60_000_000, target_rate=20_000_000)
+        
         windows = create_windows(iq)
         output_path = output_dir / f"{file.stem}.npy"
         
@@ -39,7 +44,7 @@ def process_split(
         metadata = {
             "original_filename": file.name,
             "drone_model": class_name,
-            "sampling_rate": 60e6, # Updated to 60 Msps
+            "sampling_rate": 20e6, # Downsampled to 20 Msps to match live hardware
         }
         
         meta_path = output_dir / f"{file.stem}_meta.json"
