@@ -4,7 +4,8 @@ from pathlib import Path
 
 # Helper function to split a single list of files into train, val, and test.
 def split(files: list, train_ratio: float, val_ratio: float):
-    train_end = int(len(files) * train_ratio)
+    # Ensure at least 1 file goes to training if the class has any files at all
+    train_end = max(1, int(len(files) * train_ratio)) if len(files) > 0 else 0
     val_end = train_end + int(len(files) * val_ratio)
 
     train = files[:train_end]

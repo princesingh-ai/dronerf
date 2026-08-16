@@ -39,7 +39,7 @@ def process_split(
         metadata = {
             "original_filename": file.name,
             "drone_model": class_name,
-            "sampling_rate": 20e6, # Assuming base SDR sampling rate for this dataset
+            "sampling_rate": 60e6, # Updated to 60 Msps
         }
         
         meta_path = output_dir / f"{file.stem}_meta.json"
