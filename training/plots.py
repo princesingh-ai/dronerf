@@ -49,43 +49,43 @@ def plot_loss_curve(
 
 
 def plot_confusion_matrix(
-    tp: int,
-    tn: int,
-    fp: int,
-    fn: int,
+    matrix: np.ndarray,
+    class_names: list[str],
     output_path: str = "docs/images/confusion_matrix.png",
 ):
-    """Save the confusion matrix as an image."""
+    """Save the multi-class NxN confusion matrix as an image."""
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
 
-    matrix = np.array([
-        [tp, fn],
-        [fp, tn],
-    ])
-
-    plt.figure(figsize=(6, 5))
+    # We dynamically size the figure based on the number of classes so labels don't get squished
+    fig_size = max(6, len(class_names) * 1.5)
+    plt.figure(figsize=(fig_size, fig_size - 1))
+    
     plt.imshow(matrix, cmap="Blues")
 
-    plt.title("Confusion Matrix")
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
+    plt.title("Multi-Class Confusion Matrix")
+    plt.xlabel("Predicted Class")
+    plt.ylabel("True Class")
 
+    # Rotate the x-axis labels so long drone names don't overlap
     plt.xticks(
-        [0, 1],
-        ["Drone", "Non-Drone"],
+        np.arange(len(class_names)),
+        class_names,
+        rotation=45,
+        ha="right",
     )
 
     plt.yticks(
-        [0, 1],
-        ["Drone", "Non-Drone"],
+        np.arange(len(class_names)),
+        class_names,
     )
 
     plt.colorbar()
 
-    for row in range(2):
-        for col in range(2):
-            plt.text(col, row, matrix[row, col], ha="center", va="center", fontsize=14)
+    # Add the text annotations inside the boxes
+    for row in range(len(class_names)):
+        for col in range(len(class_names)):
+            plt.text(col, row, matrix[row, col], ha="center", va="center", fontsize=12)
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=300)
