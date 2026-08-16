@@ -2,7 +2,7 @@ import json
 import re
 from pathlib import Path
 import numpy as np
-from data_processing.loaders import load_signals
+from data_processing.loaders import load_signal
 from data_processing.preprocessing import create_windows
 from data_processing.split import split_dataset
 
@@ -27,7 +27,7 @@ def process_split(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for file in files:
-        iq = load_signals(str(file))
+        iq = load_signal(str(file))
         windows = create_windows(iq)
         output_path = output_dir / f"{file.stem}.npy"
         
@@ -64,7 +64,7 @@ def create_dataset(
 
     # First, let's collect all the non-drone background noise files
     for file in non_drone_dir.rglob("*"):
-        if file.is_file() and not file.name.startswith(".DS_Store") and file.suffix != ".txt":
+        if file.is_file() and file.suffix in [".bin", ".dat", ".data"]:
             class_files["non_drone"].append(file)
 
     # Now let's dynamically discover all the drone models from the file names
