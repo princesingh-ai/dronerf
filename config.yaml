@@ -1,0 +1,46 @@
+# ==========================================
+# DroneRF Project Configuration
+# ==========================================
+
+dataset:
+  raw_drone_path: "drone_rf"
+  raw_random_path: "random_rf"
+  processed_path: "processed"
+  mapping_path: "processed/class_mapping.json"
+  
+  # Sampling rates
+  original_rate: 60000000
+  target_rate: 20000000
+  
+  # Train/Validation/Test split ratios
+  train_ratio: 0.8
+  val_ratio: 0.1
+
+training:
+  batch_size: 128
+  learning_rate: 0.001
+  epochs: 10
+  num_workers: 16
+  
+  # Current active model checkpoint for inference or resuming
+  model_path: "checkpoints/best_model.pt"
+
+realtime:
+  # Hardware SDR settings
+  center_freq: 2437000000.0  # 2.437 GHz
+  sample_rate: 20000000.0    # 20 Msps
+  chunk_size: 500000
+  
+  lna_gain: 32
+  vga_gain: 30
+  amp_enable: true
+  
+  # Inference
+  batch_size: 128
+
+evaluation:
+  blind_test_raw_path: "blind_test_raw"
+  blind_test_20_path: "processed_blind_test_20Msps"
+  blind_test_60_path: "processed_blind_test_60Msps"
+  external_clean_path: "external_val/CLEAN"
+  random_unseen_path: "random_unseen_data"

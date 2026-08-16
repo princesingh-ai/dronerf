@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from training.config import DEVICE
+from utils.config import DEVICE
 
 
 def train_one_epoch(

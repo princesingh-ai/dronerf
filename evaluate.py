@@ -9,13 +9,7 @@ from evaluation.confusion_matrix import (
 )
 
 from models.cnn1d_multiclass import MultiClassDroneCNN
-from training.config import (
-    DEVICE,
-    MODEL_PATH,
-    DATASET_PATH,
-    BATCH_SIZE,
-    NUM_WORKERS,
-)
+from utils.config import DEVICE, config
 from training.data_loader import create_dataloaders
 from training.check_points import load_checkpoint
 from training.metrics import (
@@ -30,7 +24,7 @@ from training.metrics import (
 def evaluate():
     """Evaluate the trained multi-class model on the test dataset."""
 
-    mapping_path = Path(DATASET_PATH) / "class_mapping.json"
+    mapping_path = Path(config["dataset"]["mapping_path"])
     if not mapping_path.exists():
         raise FileNotFoundError(f"Missing {mapping_path}. Run save.py first!")
         
@@ -45,9 +39,9 @@ def evaluate():
     num_classes = len(class_names)
 
     _, _, test_loader = create_dataloaders(
-        dataset_path=DATASET_PATH,
-        batch_size=BATCH_SIZE,
-        num_workers=NUM_WORKERS,
+        dataset_path=config["dataset"]["processed_path"],
+        batch_size=config["training"]["batch_size"],
+        num_workers=config["training"]["num_workers"],
     )
 
     model = MultiClassDroneCNN(num_classes=num_classes).to(DEVICE)
@@ -60,7 +54,7 @@ def evaluate():
     model, optimizer, epoch, loss = load_checkpoint(
         model,
         optimizer,
-        MODEL_PATH,
+        config["training"]["model_path"],
     )
 
     model.eval()

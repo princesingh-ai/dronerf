@@ -5,15 +5,7 @@ from pathlib import Path
 
 from models.cnn1d_multiclass import MultiClassDroneCNN
 
-from training.config import (
-    DEVICE,
-    EPOCHS,
-    LEARNING_RATE,
-    MODEL_PATH,
-    DATASET_PATH,
-    BATCH_SIZE,
-    NUM_WORKERS,
-)
+from utils.config import DEVICE, config
 
 from training.data_loader import create_dataloaders
 from training.train import train_one_epoch
@@ -26,7 +18,7 @@ from training.plots import plot_loss_curve
 # This makes the pipeline extremely robust—if we add more drone datasets later, 
 # the architecture automatically scales without touching this code!
 def get_num_classes():
-    mapping_path = Path(DATASET_PATH) / "class_mapping.json"
+    mapping_path = Path(config["dataset"]["mapping_path"])
     if not mapping_path.exists():
         raise FileNotFoundError(f"Missing {mapping_path}. Run save.py first!")
     with open(mapping_path, "r") as f:
@@ -38,9 +30,9 @@ def main():
     """Train the multi-class RF drone classifier."""
 
     train_loader, validation_loader, _ = create_dataloaders(
-        dataset_path=DATASET_PATH,
-        batch_size=BATCH_SIZE,
-        num_workers=NUM_WORKERS,
+        dataset_path=config["dataset"]["processed_path"],
+        batch_size=config["training"]["batch_size"],
+        num_workers=config["training"]["num_workers"],
     )
 
     num_classes = get_num_classes()
@@ -54,7 +46,7 @@ def main():
 
     optimizer = torch.optim.Adam(
         model.parameters(),
-        lr=LEARNING_RATE,
+        lr=config["training"]["learning_rate"],
     )
 
     best_validation_loss = float("inf")
@@ -62,7 +54,7 @@ def main():
     train_losses = []
     validation_losses = []
 
-    for epoch in range(EPOCHS):
+    for epoch in range(config["training"]["epochs"]):
 
         train_loss = train_one_epoch(
             model,
@@ -81,7 +73,7 @@ def main():
         validation_losses.append(validation_loss)
 
         print(
-            f"Epoch [{epoch + 1}/{EPOCHS}] "
+            f"Epoch [{epoch + 1}/{config['training']['epochs']}] "
             f"Train Loss: {train_loss:.4f} "
             f"Validation Loss: {validation_loss:.4f}"
         )
@@ -94,7 +86,7 @@ def main():
                 optimizer=optimizer,
                 epoch=epoch + 1,
                 loss=validation_loss,
-                path=MODEL_PATH,
+                path=config["training"]["model_path"],
             )
 
             print("✓ Best model saved.")

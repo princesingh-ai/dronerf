@@ -1,5 +1,5 @@
 from pathlib import Path
-from training.config import DEVICE
+from utils.config import DEVICE
 
 import torch
 
@@ -48,9 +48,8 @@ def load_checkpoint(
         checkpoint["model_state_dict"]
     )
 
-    optimizer.load_state_dict(
-        checkpoint["optimizer_state_dict"]
-    )
+    if optimizer is not None and "optimizer_state_dict" in checkpoint:
+        optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
     return (
         model,

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from training.train import train_one_epoch
 from training.validate import validate
-from training.config import DEVICE
+from utils.config import DEVICE
 
 class MockModel(nn.Module):
     def __init__(self, num_classes):

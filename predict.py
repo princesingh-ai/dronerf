@@ -1,31 +1,28 @@
 import argparse
-
+import json
 import numpy as np
 import torch
+from collections import Counter
+from pathlib import Path
 
 from data_processing.loaders import load_signal
 from data_processing.preprocessing import (
     create_windows,
     normalize,
 )
-from models.cnn1d import DroneCNN
+from models.cnn1d_multiclass import MultiClassDroneCNN
 from training.check_points import load_checkpoint
-from training.config import (
-    DEVICE,
-    MODEL_PATH,
-)
-
+from utils.config import DEVICE, config
+from data_processing.resample import resample_signal
 from tqdm import tqdm
 
-from data_processing.resample import resample_signal
 
 def predict(file_path: str, sample_rate: int | None = None, target_rate: int | None = None, show_progress: bool = True):
-    """Predict whether an RF recording contains a drone."""
+    """Predict the drone model of an RF recording."""
 
     iq = load_signal(file_path)
 
     if (sample_rate is not None and target_rate is not None and sample_rate != target_rate):
-
         print(f"Resampling: {sample_rate / 1e6:.0f} MSps -> " f"{target_rate / 1e6:.0f} MSps")
         print(f"Original samples : {len(iq):,}")
 
@@ -33,26 +30,27 @@ def predict(file_path: str, sample_rate: int | None = None, target_rate: int | N
         print(f"Resampled samples: {len(iq):,}")
 
     windows = create_windows(iq)
-    model = DroneCNN().to(DEVICE)
+    
+    # Load class mapping
+    mapping_path = Path(config["dataset"]["mapping_path"])
+    if not mapping_path.exists():
+        raise FileNotFoundError(f"Missing {mapping_path}. Run save.py first!")
+        
+    with open(mapping_path, "r") as f:
+        class_mapping = json.load(f)
+        
+    idx_to_class = {v: k for k, v in class_mapping.items()}
+    num_classes = len(class_mapping)
 
-    optimizer = torch.optim.Adam(
-        model.parameters(),
-        lr=1e-3,
-    )
-
-    model, optimizer, _, _ = load_checkpoint(
-        model,
-        optimizer,
-        MODEL_PATH,
-    )
+    model = MultiClassDroneCNN(num_classes=num_classes).to(DEVICE)
+    model, _, _, _ = load_checkpoint(model, None, config["training"]["model_path"])
     model.eval()
 
-    probabilities = []
+    all_preds = []
 
     iterator = tqdm(windows, desc="Predicting", unit="window") if show_progress else windows
 
     with torch.no_grad():
-
         for window in iterator:
             window = normalize(window)
             window = np.stack(
@@ -69,28 +67,31 @@ def predict(file_path: str, sample_rate: int | None = None, target_rate: int | N
 
             window = window.unsqueeze(0).to(DEVICE)
             output = model(window)
-            probability = torch.sigmoid(output).item()
-            probabilities.append(probability)
+            
+            pred = torch.argmax(output, dim=1).item()
+            all_preds.append(pred)
 
-    average_probability = sum(probabilities) / len(probabilities)
+    # Most common class predicted across all windows
+    counter = Counter(all_preds)
+    most_common_idx = counter.most_common(1)[0][0]
+    prediction_str = idx_to_class[most_common_idx]
+    
+    agreement_ratio = counter[most_common_idx] / len(all_preds)
 
-    prediction = ("Drone" if average_probability >= 0.5 else "Non-Drone")
-
-    print(f"Windows              : {len(probabilities)}")
-    print(f"Average Probability  : {average_probability:.4f}")
-    print(f"Prediction           : {prediction}")
+    print(f"Windows              : {len(all_preds)}")
+    print(f"Agreement Ratio      : {agreement_ratio:.2%}")
+    print(f"Prediction           : {prediction_str}")
 
     return {
-        "windows": len(probabilities),
-        "average_probability": float(average_probability),
-        "prediction": prediction,
+        "windows": len(all_preds),
+        "predicted_index": int(most_common_idx),
+        "prediction_str": prediction_str,
+        "agreement_ratio": agreement_ratio,
     }
 
-if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(
-        description="RF Drone Detection",
-    )
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="RF Drone Detection")
 
     parser.add_argument(
         "file",
@@ -98,17 +99,18 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-    "--sample-rate",
-    type=int,
-    default=None,
-    help="Sampling rate of the input recording (Hz)")
+        "--sample-rate",
+        type=int,
+        default=config["dataset"]["original_rate"],
+        help="Sampling rate of the input recording (Hz)",
+    )
 
     parser.add_argument(
-    "--target-rate",
-    type=int,
-    default=None,
-    help="Target sampling rate before inference (Hz)")
+        "--target-rate",
+        type=int,
+        default=config["dataset"]["target_rate"],
+        help="Target sampling rate before inference (Hz)",
+    )
 
     args = parser.parse_args()
-
     predict(args.file, sample_rate=args.sample_rate, target_rate=args.target_rate)

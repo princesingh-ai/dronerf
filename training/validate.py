@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from training.config import DEVICE
+from utils.config import DEVICE
 
 
 def validate(
