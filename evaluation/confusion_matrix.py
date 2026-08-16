@@ -1,32 +1,29 @@
 import torch
+from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
+import numpy as np
+
+# We're moving from a hardcoded 2x2 matrix (TP, TN, FP, FN) to an NxN matrix 
+# that handles any number of drone classes dynamically using scikit-learn.
+
+def calculate_confusion_matrix(predictions: torch.Tensor, labels: torch.Tensor):
+    """Compute the multi-class confusion matrix."""
+    pred_np = predictions.cpu().numpy()
+    label_np = labels.cpu().numpy()
+    
+    return sklearn_confusion_matrix(label_np, pred_np)
 
 
-def confusion_matrix(predictions: torch.Tensor, labels: torch.Tensor):
-    """Compute the confusion matrix."""
-
-    predictions = (torch.sigmoid(predictions) >= 0.5).int()
-    labels = labels.int()
-
-    tp = ((predictions == 1) & (labels == 1)).sum().item()
-    tn = ((predictions == 0) & (labels == 0)).sum().item()
-    fp = ((predictions == 1) & (labels == 0)).sum().item()
-    fn = ((predictions == 0) & (labels == 1)).sum().item()
-
-    return tp, tn, fp, fn
-
-
-def print_confusion_matrix(
-    tp: int,
-    tn: int,
-    fp: int,
-    fn: int,
-):
-    """Print the confusion matrix."""
-
-    print()
-    print("Confusion Matrix")
-    print("------------------------------")
-    print(f"{'':15}Predicted")
-    print(f"{'':15}Drone   Non-Drone")
-    print(f"{'Drone':15}{tp:<8}{fn}")
-    print(f"{'Non-Drone':15}{fp:<8}{tn}")
+def print_confusion_matrix(matrix: np.ndarray, class_names: list[str]):
+    """Print the NxN confusion matrix to the console."""
+    
+    print("\nConfusion Matrix")
+    print("-" * 50)
+    
+    # We want a nice dynamic column header
+    header = f"{'':20}" + "".join([f"{name[:8]:>10}" for name in class_names])
+    print(header)
+    
+    # Print each row with its true label class name
+    for i, row in enumerate(matrix):
+        row_str = "".join([f"{val:>10}" for val in row])
+        print(f"{class_names[i][:18]:<20}{row_str}")
