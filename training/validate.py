@@ -15,12 +15,7 @@ def validate(
 
         for windows, labels in dataloader:
             windows = windows.to(DEVICE)
-            labels = (
-                labels
-                .float()
-                .unsqueeze(1)
-                .to(DEVICE)
-            )
+            labels = labels.to(DEVICE)
             outputs = model(windows)
 
             loss = criterion(

@@ -17,12 +17,7 @@ def train_one_epoch(
 
         windows = windows.to(DEVICE)
 
-        labels = (
-            labels
-            .float()
-            .unsqueeze(1)
-            .to(DEVICE)
-        )
+        labels = labels.to(DEVICE)
         optimizer.zero_grad()
         outputs = model(windows)
 
