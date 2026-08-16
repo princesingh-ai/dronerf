@@ -1,23 +1,50 @@
+import json
+import re
 from pathlib import Path
 import numpy as np
 from data_processing.loaders import load_signals
 from data_processing.preprocessing import create_windows
 from data_processing.split import split_dataset
 
+# We need to extract the exact drone model from the filename.
+# Most drone files in the dataset look like "DJI_inspire_2_2G.bin" or "DJI_phantom_4_pro_plus_5G_1of2.bin".
+# I'll use a regex to strip off the band info ("_2G", "_5G") and file parts ("_1of2") to get the pure model name.
+def parse_drone_model(filename: str) -> str:
+    # Match everything up to the last _2G or _5G
+    match = re.match(r"(.*)_(2G|5G).*", filename)
+    if match:
+        return match.group(1)
+    
+    # Fallback if the filename doesn't follow the pattern
+    return Path(filename).stem
 
 def process_split(
     files: list[Path],
     output_dir: Path,
+    class_name: str,
 ):
-    """Load recordings, create windows, and save them."""
-
+    # Ensure the output directory for this specific class exists (e.g. processed/train/DJI_inspire_2/)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for file in files:
         iq = load_signals(str(file))
         windows = create_windows(iq)
         output_path = output_dir / f"{file.stem}.npy"
+        
+        # Save the sliding windows as an npy file for memory mapping during training
         np.save(output_path, windows)
+        
+        # We need to preserve the metadata for future research on sampling rates and generalization!
+        # I'm saving it alongside the npy file so it doesn't interfere with np.load mmap_mode.
+        metadata = {
+            "original_filename": file.name,
+            "drone_model": class_name,
+            "sampling_rate": 20e6, # Assuming base SDR sampling rate for this dataset
+        }
+        
+        meta_path = output_dir / f"{file.stem}_meta.json"
+        with open(meta_path, "w") as f:
+            json.dump(metadata, f, indent=4)
 
 
 def create_dataset(
@@ -25,52 +52,52 @@ def create_dataset(
     non_drone_path: str,
     output_dir: str,
 ):
-    """Create train, validation, and test datasets."""
+    drone_dir = Path(drone_path)
+    non_drone_dir = Path(non_drone_path)
+    out_dir = Path(output_dir)
+    
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    drone_files = [
-        file
-        for file in Path(drone_path).glob("*.bin")
-        if file.is_file()
-    ]
+    class_files = {"non_drone": []}
+    class_mapping = {"non_drone": 0}
+    current_class_id = 1
 
-    non_drone_files = [
-        file
-        for file in Path(non_drone_path).rglob("*.data")
-        if file.is_file()
-    ]
+    # First, let's collect all the non-drone background noise files
+    for file in non_drone_dir.rglob("*"):
+        if file.is_file() and not file.name.startswith(".DS_Store") and file.suffix != ".txt":
+            class_files["non_drone"].append(file)
 
-    (train_drone, val_drone, test_drone, train_non_drone, val_non_drone, test_non_drone,) = split_dataset(drone_files, non_drone_files,)
-    output_dir = Path(output_dir)
+    # Now let's dynamically discover all the drone models from the file names
+    for file in drone_dir.glob("*.bin"):
+        if file.is_file():
+            model_name = parse_drone_model(file.name)
+            
+            if model_name not in class_files:
+                class_files[model_name] = []
+                class_mapping[model_name] = current_class_id
+                current_class_id += 1
+                
+            class_files[model_name].append(file)
 
-    process_split(
-        train_drone,
-        output_dir / "train" / "drone",
-    )
+    # I'll save this mapping to disk. This mapping is our single source of truth!
+    # The PyTorch Dataset and the Inference script will load this to ensure labels match up.
+    mapping_path = out_dir / "class_mapping.json"
+    with open(mapping_path, "w") as f:
+        json.dump(class_mapping, f, indent=4)
+        
+    print(f"Generated class mapping: {class_mapping}")
 
-    process_split(
-        train_non_drone,
-        output_dir / "train" / "non_drone",
-    )
+    # Now perform our perfectly stratified multi-class split across all models
+    splits = split_dataset(class_files, train_ratio=0.8, val_ratio=0.1, test_ratio=0.1)
 
-    process_split(
-        val_drone,
-        output_dir / "validation" / "drone",
-    )
+    # Finally, process and save the windows for each split and class
+    for split_name, classes in splits.items():
+        for class_name, files in classes.items():
+            print(f"Processing {split_name} for class {class_name} ({len(files)} files)...")
+            
+            class_output_dir = out_dir / split_name / class_name
+            process_split(files, class_output_dir, class_name)
 
-    process_split(
-        val_non_drone,
-        output_dir / "validation" / "non_drone",
-    )
-
-    process_split(
-        test_drone,
-        output_dir / "test" / "drone",
-    )
-
-    process_split(
-        test_non_drone,
-        output_dir / "test" / "non_drone",
-    )
 
 if __name__ == "__main__":
     create_dataset(
