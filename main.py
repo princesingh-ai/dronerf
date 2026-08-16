@@ -1,7 +1,9 @@
 import torch
 import torch.nn as nn
+import json
+from pathlib import Path
 
-from models.cnn1d import DroneCNN
+from models.cnn1d_multiclass import MultiClassDroneCNN
 
 from training.config import (
     DEVICE,
@@ -19,8 +21,21 @@ from training.validate import validate
 from training.check_points import save_checkpoint
 from training.plots import plot_loss_curve
 
+
+# We dynamically calculate the number of classes from our persistent mapping file.
+# This makes the pipeline extremely robust—if we add more drone datasets later, 
+# the architecture automatically scales without touching this code!
+def get_num_classes():
+    mapping_path = Path(DATASET_PATH) / "class_mapping.json"
+    if not mapping_path.exists():
+        raise FileNotFoundError(f"Missing {mapping_path}. Run save.py first!")
+    with open(mapping_path, "r") as f:
+        mapping = json.load(f)
+    return len(mapping)
+
+
 def main():
-    """Train the RF drone classifier."""
+    """Train the multi-class RF drone classifier."""
 
     train_loader, validation_loader, _ = create_dataloaders(
         dataset_path=DATASET_PATH,
@@ -28,8 +43,14 @@ def main():
         num_workers=NUM_WORKERS,
     )
 
-    model = DroneCNN().to(DEVICE)
-    criterion = nn.BCEWithLogitsLoss()
+    num_classes = get_num_classes()
+    print(f"Initializing MultiClassDroneCNN with {num_classes} classes...")
+
+    # Instantiate the new multi-class model
+    model = MultiClassDroneCNN(num_classes=num_classes).to(DEVICE)
+    
+    # We switch to CrossEntropyLoss, which expects logits and integer targets
+    criterion = nn.CrossEntropyLoss()
 
     optimizer = torch.optim.Adam(
         model.parameters(),
