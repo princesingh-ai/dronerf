@@ -1,43 +1,34 @@
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score as sklearn_f1_score
 import torch
 
+# We are switching from manual binary metrics to scikit-learn's robust multi-class metrics.
+# These functions now expect `predictions` and `labels` to be 1D tensors of integer class indices.
 
 def accuracy(predictions, labels):
     """Compute classification accuracy."""
-    predictions = (torch.sigmoid(predictions) >= 0.5).float()
-    correct = (predictions == labels).sum().item()
-    
-    return correct / len(labels)
+    # Move to CPU and numpy for scikit-learn
+    pred_np = predictions.cpu().numpy()
+    label_np = labels.cpu().numpy()
+    return accuracy_score(label_np, pred_np)
 
 
-def precision(predictions, labels):
-    """Compute precision."""
-    predictions = (torch.sigmoid(predictions) >= 0.5).float()
-    tp = ((predictions == 1) & (labels == 1)).sum().item()
-    fp = ((predictions == 1) & (labels == 0)).sum().item()
-    if tp + fp == 0:
-        return 0.0
-
-    return tp / (tp + fp)
+def precision(predictions, labels, average='macro'):
+    """Compute precision (macro by default for multi-class)."""
+    pred_np = predictions.cpu().numpy()
+    label_np = labels.cpu().numpy()
+    # zero_division=0 prevents warnings if a class is never predicted
+    return precision_score(label_np, pred_np, average=average, zero_division=0)
 
 
-def recall(predictions, labels):
-    """Compute recall."""
-    predictions = (torch.sigmoid(predictions) >= 0.5).float()
-    tp = ((predictions == 1) & (labels == 1)).sum().item()
-    fn = ((predictions == 0) & (labels == 1)).sum().item()
-
-    if tp + fn == 0:
-        return 0.0
-
-    return tp / (tp + fn)
+def recall(predictions, labels, average='macro'):
+    """Compute recall (macro by default for multi-class)."""
+    pred_np = predictions.cpu().numpy()
+    label_np = labels.cpu().numpy()
+    return recall_score(label_np, pred_np, average=average, zero_division=0)
 
 
-def f1_score(predictions, labels):
-    """Compute F1-score."""
-    p = precision(predictions, labels)
-    r = recall(predictions, labels)
-
-    if p + r == 0:
-        return 0.0
-    
-    return 2 * p * r / (p + r)
+def f1_score(predictions, labels, average='macro'):
+    """Compute F1-score (macro by default for multi-class)."""
+    pred_np = predictions.cpu().numpy()
+    label_np = labels.cpu().numpy()
+    return sklearn_f1_score(label_np, pred_np, average=average, zero_division=0)
