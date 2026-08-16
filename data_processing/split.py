@@ -1,8 +1,9 @@
 import random
+from typing import Dict, List, Tuple
+from pathlib import Path
 
+# Helper function to split a single list of files into train, val, and test.
 def split(files: list, train_ratio: float, val_ratio: float):
-    """Split a list of recordings into train, validation, and test sets."""
-
     train_end = int(len(files) * train_ratio)
     val_end = train_end + int(len(files) * val_ratio)
 
@@ -12,37 +13,37 @@ def split(files: list, train_ratio: float, val_ratio: float):
 
     return train, val, test
 
-def split_dataset(drone_files: list, non_drone_files: list, train_ratio: float = 0.8, val_ratio: float = 0.1, test_ratio: float = 0.1, seed: int = 42,):
-    """Split drone and non-drone recordings into train, validation, and test sets."""
-
+# We are switching from a hardcoded drone/non-drone split to a generic multi-class split.
+# This ensures that every individual drone model (and non-drone) gets the exact 80/10/10 split,
+# avoiding situations where a specific drone ends up entirely in the test set.
+def split_dataset(
+    class_files: Dict[str, List[Path]], 
+    train_ratio: float = 0.8, 
+    val_ratio: float = 0.1, 
+    test_ratio: float = 0.1, 
+    seed: int = 42
+) -> Dict[str, Dict[str, List[Path]]]:
+    
     if abs(train_ratio + val_ratio + test_ratio - 1.0) > 1e-6:
         raise ValueError("Train, validation, and test ratios must sum to 1.")
 
     random.seed(seed)
 
-    drone_files = drone_files.copy()
-    non_drone_files = non_drone_files.copy()
+    splits = {
+        "train": {},
+        "validation": {},
+        "test": {}
+    }
 
-    random.shuffle(drone_files)
-    random.shuffle(non_drone_files)
+    # Iterate through each class independently to maintain stratification
+    for class_name, files in class_files.items():
+        files_copy = files.copy()
+        random.shuffle(files_copy)
 
-    train_drone, val_drone, test_drone = split(
-        drone_files,
-        train_ratio,
-        val_ratio,
-    )
+        train_files, val_files, test_files = split(files_copy, train_ratio, val_ratio)
 
-    train_non_drone, val_non_drone, test_non_drone = split(
-        non_drone_files,
-        train_ratio,
-        val_ratio,
-    )
+        splits["train"][class_name] = train_files
+        splits["validation"][class_name] = val_files
+        splits["test"][class_name] = test_files
 
-    return (
-        train_drone,
-        val_drone,
-        test_drone,
-        train_non_drone,
-        val_non_drone,
-        test_non_drone,
-    )
+    return splits
