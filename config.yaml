@@ -12,9 +12,11 @@ dataset:
   original_rate: 60000000
   target_rate: 20000000
   
-  # Train/Validation/Test split ratios
-  train_ratio: 0.8
+  # Train/Validation/Test/Blind split ratios
+  train_ratio: 0.7
   val_ratio: 0.1
+  test_ratio: 0.1
+  blind_ratio: 0.1
 
 training:
   batch_size: 128
