@@ -5,47 +5,39 @@ from collections import Counter
 from pathlib import Path
 
 from data_processing.preprocessing import create_windows, normalize
-from models.cnn1d_multiclass import MultiClassDroneCNN
+from models.cnn1d import DroneCNN
 from training.check_points import load_checkpoint
 from utils.config import DEVICE, config
 
 class DroneInference:
     """
-    Inference wrapper around the MultiClassDroneCNN model.
-    Transforms complex IQ -> 4096-sample windows -> normalized [B, 2, 4096] -> argmax multi-class prediction.
+    Inference wrapper around the DroneCNN model.
+    Transforms complex IQ -> 4096-sample windows -> normalized [B, 2, 4096] -> binary prediction.
     """
 
     def __init__(self, model_path: str = None, batch_size: int = 128, mapping_path: str = None):
         if model_path is None:
-            model_path = config["training"]["model_path"]
-        if mapping_path is None:
-            mapping_path = config["dataset"]["mapping_path"]
+            model_path = "/Users/prince/projects/dronerf/checkpoints/best_model.pt"
+            
         self.device = DEVICE
         self.batch_size = batch_size
         
-        # Load class mapping
-        if not Path(mapping_path).exists():
-            raise FileNotFoundError(f"Class mapping not found at {mapping_path}. Run data processing first!")
-            
-        with open(mapping_path, "r") as f:
-            self.class_mapping = json.load(f)
-            
-        # Create inverse mapping (index -> string name)
-        self.idx_to_class = {v: k for k, v in self.class_mapping.items()}
-        self.num_classes = len(self.class_mapping)
+        # Binary classification mapping
+        self.idx_to_class = {0: "Noise/Background", 1: "Drone Detected"}
+        self.num_classes = 2
         
-        # Load the dynamic multi-class model
+        # Load the 1D CNN binary model
         self.model = self.load_model(model_path)
 
     def load_model(self, model_path: str) -> torch.nn.Module:
-        """Load the existing MultiClassDroneCNN checkpoint."""
-        model = MultiClassDroneCNN(num_classes=self.num_classes).to(self.device)
+        """Load the existing DroneCNN checkpoint."""
+        model = DroneCNN().to(self.device)
 
         # Pass None for the optimizer since we are only doing inference
         model, _, epoch, loss = load_checkpoint(model, None, model_path)
         model.eval()
 
-        print(f"Loaded MultiClassDroneCNN checkpoint (epoch={epoch}, loss={loss:.6f})")
+        print(f"Loaded DroneCNN checkpoint (epoch={epoch}, loss={loss:.6f})")
         return model
 
     @staticmethod
@@ -84,8 +76,8 @@ class DroneInference:
 
             with torch.no_grad():
                 logits = self.model(batch)
-                # Multi-class uses argmax instead of sigmoid thresholding
-                preds = torch.argmax(logits, dim=1).cpu().numpy()
+                # Binary classification uses sigmoid thresholding
+                preds = (torch.sigmoid(logits) > 0.5).int().flatten().cpu().numpy()
                 all_preds.extend(preds)
 
         # Most common class predicted across all windows in this chunk
