@@ -10,7 +10,7 @@ from data_processing.preprocessing import (
     create_windows,
     normalize,
 )
-from models.cnn1d_multiclass import MultiClassDroneCNN
+from models.cnn1d import DroneCNN
 from training.check_points import load_checkpoint
 from utils.config import DEVICE, config
 from data_processing.resample import resample_signal
@@ -31,19 +31,10 @@ def predict(file_path: str, sample_rate: int | None = None, target_rate: int | N
 
     windows = create_windows(iq)
     
-    # Load class mapping
-    mapping_path = Path(config["dataset"]["mapping_path"])
-    if not mapping_path.exists():
-        raise FileNotFoundError(f"Missing {mapping_path}. Run save.py first!")
-        
-    with open(mapping_path, "r") as f:
-        class_mapping = json.load(f)
-        
-    idx_to_class = {v: k for k, v in class_mapping.items()}
-    num_classes = len(class_mapping)
+    idx_to_class = {0: "Noise/Background", 1: "Drone Detected"}
 
-    model = MultiClassDroneCNN(num_classes=num_classes).to(DEVICE)
-    model, _, _, _ = load_checkpoint(model, None, config["training"]["model_path"])
+    model = DroneCNN().to(DEVICE)
+    model, _, _, _ = load_checkpoint(model, None, "/Users/prince/projects/dronerf/checkpoints/best_model.pt")
     model.eval()
 
     all_preds = []
@@ -68,7 +59,7 @@ def predict(file_path: str, sample_rate: int | None = None, target_rate: int | N
             window = window.unsqueeze(0).to(DEVICE)
             output = model(window)
             
-            pred = torch.argmax(output, dim=1).item()
+            pred = (torch.sigmoid(output) > 0.5).int().item()
             all_preds.append(pred)
 
     # Most common class predicted across all windows
